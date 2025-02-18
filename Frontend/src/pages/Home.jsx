@@ -10,12 +10,13 @@ const Home = () => {
       
       {/* Logo */}
       <motion.div
-        className="absolute top-4 left-4 p-2"
+        className="absolute top-4 left-4 p-2 flex justify-center items-center"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 1 }}
       >
-        <img src={logoUrl} alt="GadgetFlow Logo" className="h-12 w-auto" />
+        <img src="/images/Logo.png" alt="GadgetFlow Logo" className="h-10 w-auto" />
+        <h1 className="p-2 font-bold text-2xl">GadgetFlow</h1>
       </motion.div>
 
       {/* Header Section */}
