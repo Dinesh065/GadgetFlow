@@ -2,12 +2,12 @@ import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { Menu, X, Home, List, Bell, MessageSquare, Calendar, LogOut } from "lucide-react"; // Using Lucide icons
 
-const SellerNavbar = () => {
+const SellerNavbar = ({ onLogout }) => {
   const [isOpen, setIsOpen] = useState(false); // State for mobile menu
 
   return (
     <nav className="bg-orange-600 shadow-md">
-      <div className="container mx-auto flex justify-between items-center p-4 relative">
+      <div className=" mx-auto flex justify-between items-center p-4 relative">
         
         {/* Logo & Brand Name */}
         <div className="flex items-center space-x-2">
@@ -24,11 +24,16 @@ const SellerNavbar = () => {
           <NavItem to="/rental-calendar" icon={<Calendar size={20} />} text="Rental Calendar" />
         </div>
 
-        {/* Logout Button */}
-        <button className="hidden md:block border-2 border-white px-4 py-2 rounded-lg text-white hover:bg-white hover:text-orange-600 transition duration-300 flex items-center space-x-2">
-          <LogOut size={20} />
-          <span>Logout</span>
-        </button>
+        {/* Logout Button for Desktop View */}
+        <div className="hidden md:block">
+          <button 
+            onClick={onLogout} // ✅ Logout works now
+            className="border-2 border-white px-4 py-2 rounded-lg text-white hover:bg-white hover:text-orange-600 transition duration-300 flex items-center space-x-2"
+          >
+            <LogOut size={20} />
+            <span>Logout</span>
+          </button>
+        </div>
 
         {/* Hamburger Menu Button */}
         <button className="md:hidden text-white" onClick={() => setIsOpen(!isOpen)}>
@@ -44,7 +49,12 @@ const SellerNavbar = () => {
           <NavItem to="/notifications" icon={<Bell size={20} />} text="Notifications" mobile />
           <NavItem to="/chat" icon={<MessageSquare size={20} />} text="Customer Chat" mobile />
           <NavItem to="/rental-calendar" icon={<Calendar size={20} />} text="Rental Calendar" mobile />
-          <button className="border-2 border-white px-4 py-2 rounded-lg text-white hover:bg-white hover:text-orange-600 transition duration-300 flex items-center space-x-2">
+          
+          {/* Logout Button for Mobile View */}
+          <button 
+            onClick={onLogout} // ✅ Logout works for mobile too
+            className="border-2 border-white px-4 py-2 rounded-lg text-white hover:bg-white hover:text-orange-600 transition duration-300 flex items-center space-x-2"
+          >
             <LogOut size={20} />
             <span>Logout</span>
           </button>

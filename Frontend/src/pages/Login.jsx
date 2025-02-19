@@ -5,34 +5,33 @@ import { Link, useNavigate } from "react-router-dom";
 const Login = ({ setUserRole }) => {
   const navigate = useNavigate();
   const [data, setData] = useState({ email: "", password: "" });
-  const [role, setRole] = useState("buyer");  
+  const [role, setRole] = useState("buyer");
   const [error, setError] = useState("");
 
   const handleChange = ({ currentTarget: input }) => {
-    setData({ ...data, [input.name]: input.value }); 
+    setData({ ...data, [input.name]: input.value });
   };
 
   const handleSubmit = async (event) => {
     event.preventDefault();
 
-    const storedSignupRole = localStorage.getItem("signupRole");
+    const storedSignupRole = localStorage.getItem(`signupRole_${data.email}`);
     if (storedSignupRole !== role) {
       setError("Role mismatch! You must log in with the same role you signed up with.");
       return;
     }
 
     try {
-      const url = "http://localhost:8000/api/v1/users/login"; 
-      const response = await axios.post(url, { ...data, role }, { withCredentials: false });
+      const url = "http://localhost:8000/api/v1/users/login";
+      const response = await axios.post(url, { ...data, role });
 
-      localStorage.setItem("token", response.data.data);  
-      localStorage.setItem("userRole", role);  
+      localStorage.setItem("token", response.data.data);
+      localStorage.setItem("userRole", role);
       setUserRole(role);
 
       navigate(role === "buyer" ? "/buyer-dashboard" : "/seller-dashboard");
     } catch (error) {
-      if (error.response && error.response.status >= 400 && error.response.status <= 500) {
-        console.error("Error message:", error.response.data.message);
+      if (error.response) {
         setError(error.response.data.message);
       }
     }
@@ -48,29 +47,29 @@ const Login = ({ setUserRole }) => {
           <p className="text-gray-300 text-sm mb-6">Login to continue renting gadgets.</p>
 
           <form onSubmit={handleSubmit} className="w-full flex flex-col space-y-4">
-            <input 
-              type="email" 
+            <input
+              type="email"
               placeholder="Email"
               name="email"
               onChange={handleChange}
-              value={data.email} 
-              className="px-4 py-3 rounded-xl w-full bg-gray-700 text-white" 
-              required 
+              value={data.email}
+              className="px-4 py-3 rounded-xl w-full bg-gray-700 text-white"
+              required
             />
-            <input 
-              type="password" 
+            <input
+              type="password"
               placeholder="Password"
               name="password"
               onChange={handleChange}
-              value={data.password}  
-              className="px-4 py-3 rounded-xl w-full bg-gray-700 text-white" 
-              required 
+              value={data.password}
+              className="px-4 py-3 rounded-xl w-full bg-gray-700 text-white"
+              required
             />
-            
+
             {/* Role Selection */}
-            <select 
-              className="px-4 py-2 rounded-xl w-full bg-gray-700 text-white" 
-              value={role} 
+            <select
+              className="px-4 py-2 rounded-xl w-full bg-gray-700 text-white"
+              value={role}
               onChange={(e) => setRole(e.target.value)}
             >
               <option value="buyer">Buyer</option>

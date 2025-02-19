@@ -2,12 +2,12 @@ import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { Menu, X, Home, ShoppingCart, Heart, Package, Bell, LogOut } from "lucide-react"; // Using Lucide icons
 
-const BuyerNavbar = () => {
+const BuyerNavbar = ({ onLogout }) => {
   const [isOpen, setIsOpen] = useState(false); // State for mobile menu
 
   return (
     <nav className="bg-blue-600 shadow-md">
-      <div className="h-[70px] container mx-auto flex justify-between items-center p-4 relative">
+      <div className="mx-auto flex justify-between items-center p-4 relative">
         
         {/* Logo & Brand Name */}
         <div className="flex items-center space-x-2">
@@ -24,11 +24,16 @@ const BuyerNavbar = () => {
           <NavItem to="/notifications" icon={<Bell size={20} />} text="Notifications" />
         </div>
 
-        {/* Logout Button */}
-        <button className="flex border-2 border-white px-4 py-2 rounded-lg text-white hover:bg-white hover:text-blue-600 transition duration-300 items-center space-x-2">
-          <LogOut size={20} />
-          <span>Logout</span>
-        </button>
+        {/* Logout Button for Desktop View */}
+        <div className="hidden md:block">
+          <button 
+            onClick={onLogout} // ✅ Logout works now
+            className="border-2 border-white px-4 py-2 rounded-lg text-white hover:bg-white hover:text-blue-600 transition duration-300 flex items-center space-x-2"
+          >
+            <LogOut size={20} />
+            <span>Logout</span>
+          </button>
+        </div>
 
         {/* Hamburger Menu Button */}
         <button className="md:hidden text-white" onClick={() => setIsOpen(!isOpen)}>
@@ -44,7 +49,12 @@ const BuyerNavbar = () => {
           <NavItem to="/wishlist" icon={<Heart size={20} />} text="Wishlist" mobile />
           <NavItem to="/orders" icon={<Package size={20} />} text="Order History" mobile />
           <NavItem to="/notifications" icon={<Bell size={20} />} text="Notifications" mobile />
-          <button className="border-2 border-white px-4 py-2 rounded-lg text-white hover:bg-white hover:text-blue-600 transition duration-300 flex items-center space-x-2">
+          
+          {/* Logout Button for Mobile View */}
+          <button 
+            onClick={onLogout} // ✅ Logout works for mobile too
+            className="border-2 border-white px-4 py-2 rounded-lg text-white hover:bg-white hover:text-blue-600 transition duration-300 flex items-center space-x-2"
+          >
             <LogOut size={20} />
             <span>Logout</span>
           </button>
@@ -54,7 +64,7 @@ const BuyerNavbar = () => {
   );
 };
 
-// /* Reusable Nav Item Component */
+/* Reusable Nav Item Component */
 const NavItem = ({ to, icon, text, mobile }) => (
   <Link 
     to={to} 

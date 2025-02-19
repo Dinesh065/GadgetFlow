@@ -29,10 +29,12 @@ const Signup = () => {
       const response = await axios.post(url, formData);
 
       // Store the role for validation at login
-      localStorage.setItem("signupRole", formData.role);
+      localStorage.setItem(`signupRole_${formData.email}`, formData.role);
       
       setSuccess("Signup successful! Redirecting to login...");
-      setTimeout(() => navigate("/login"), 2000); // Redirect after success
+      console.log("Stored role in localStorage:", localStorage.getItem(`signupRole_${formData.email}`));
+
+      setTimeout(() => navigate("/login"), 1000); // Redirect after success
     } catch (error) {
       if (error.response) {
         setError(error.response.data.message || "Signup failed. Try again.");
