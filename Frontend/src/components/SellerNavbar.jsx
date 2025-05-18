@@ -6,9 +6,9 @@ const SellerNavbar = ({ onLogout }) => {
   const [isOpen, setIsOpen] = useState(false); // State for mobile menu
 
   return (
-    <nav className="bg-orange-600 shadow-md">
+    <nav className="bg-gray-900 shadow-md sticky top-0 z-50">
       <div className=" mx-auto flex justify-between items-center p-4 relative">
-        
+
         {/* Logo & Brand Name */}
         <div className="flex items-center space-x-2">
           <img src="/images/Logo.png" alt="GadgetFlow Logo" className="h-10 w-auto" />
@@ -26,7 +26,7 @@ const SellerNavbar = ({ onLogout }) => {
 
         {/* Logout Button for Desktop View */}
         <div className="hidden md:block">
-          <button 
+          <button
             onClick={onLogout} // ✅ Logout works now
             className="border-2 border-white px-4 py-2 rounded-lg text-white hover:bg-white hover:text-orange-600 transition duration-300 flex items-center space-x-2"
           >
@@ -49,9 +49,9 @@ const SellerNavbar = ({ onLogout }) => {
           <NavItem to="/notifications" icon={<Bell size={20} />} text="Notifications" mobile />
           <NavItem to="/chat" icon={<MessageSquare size={20} />} text="Customer Chat" mobile />
           <NavItem to="/rental-calendar" icon={<Calendar size={20} />} text="Rental Calendar" mobile />
-          
+
           {/* Logout Button for Mobile View */}
-          <button 
+          <button
             onClick={onLogout} // ✅ Logout works for mobile too
             className="border-2 border-white px-4 py-2 rounded-lg text-white hover:bg-white hover:text-orange-600 transition duration-300 flex items-center space-x-2"
           >
@@ -66,8 +66,8 @@ const SellerNavbar = ({ onLogout }) => {
 
 /* Reusable Nav Item Component */
 const NavItem = ({ to, icon, text, mobile }) => (
-  <Link 
-    to={to} 
+  <Link
+    to={to}
     className={`flex items-center space-x-2 text-white hover:text-gray-300 transition-all ${mobile ? "py-2 px-4" : ""}`}
   >
     {icon}

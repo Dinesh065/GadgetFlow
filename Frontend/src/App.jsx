@@ -46,7 +46,7 @@ function MainContent({ userRole, handleLogout, setUserRole }) {
   return (
     <>
       {!hideNavbar && userRole === "buyer" && <BuyerNavbar onLogout={handleLogout} />}
-      {!hideNavbar && userRole === "seller" && <SellerNavbar onLogout={handleLogout} />}
+      {!hideNavbar && userRole === "seller" && <SellerNavbar className="bg-black" onLogout={handleLogout} />}
 
       <Routes>
         {/* Public Routes */}

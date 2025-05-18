@@ -24,9 +24,12 @@ const Login = ({ setUserRole }) => {
     try {
       const url = "http://localhost:8000/api/v1/users/login";
       const response = await axios.post(url, { ...data, role });
+      const { token, role: userRole, ownerId } = response.data;
 
       localStorage.setItem("token", response.data.data);
+      localStorage.setItem("ownerId", ownerId);
       localStorage.setItem("userRole", role);
+
       setUserRole(role);
 
       navigate(role === "buyer" ? "/buyer-dashboard" : "/seller-dashboard");
@@ -40,7 +43,7 @@ const Login = ({ setUserRole }) => {
   return (
     <div className="bg-gradient-to-br from-blue-500 to-indigo-700 min-h-screen flex items-center justify-center p-4">
       <div className="flex flex-col md:flex-row bg-white bg-opacity-20 backdrop-blur-lg shadow-2xl rounded-2xl overflow-hidden w-full max-w-3xl">
-        
+
         {/* Left Section - Login Form */}
         <div className="w-full md:w-1/2 p-8 flex flex-col justify-center items-center bg-opacity-80 bg-gray-900">
           <h1 className="text-3xl font-bold text-white mb-4">Welcome Back!</h1>
