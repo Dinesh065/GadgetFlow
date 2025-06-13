@@ -1,6 +1,6 @@
 import { FaTimes, FaChevronLeft, FaChevronRight } from "react-icons/fa";
 import { useState, useEffect } from "react";
- 
+
 const DetailCard = ({ gadget = {}, onClose }) => {
   if (!gadget || Object.keys(gadget).length === 0) return null;
 
@@ -91,26 +91,42 @@ const DetailCard = ({ gadget = {}, onClose }) => {
           </div>
 
           {/* Right: Details */}
+          {/* Right: Details */}
           <div className="w-1/2 overflow-y-auto pr-2">
             <h2 className="text-3xl font-semibold mb-2">{gadget.name || "No Name"}</h2>
             <p className="text-gray-600 mb-4">{gadget.description || "No description available."}</p>
-            <p className="text-xl font-bold text-orange-600 mb-4">₹ {gadget.price ? gadget.price + "/day" : "N/A"}</p>
+            <p className="text-xl font-bold text-orange-600 mb-4">
+              ₹ {gadget.price ? gadget.price + "/day" : "N/A"}
+            </p>
 
             <div className="space-y-3 text-gray-700 text-sm">
               <p><strong>Due Date:</strong> {gadget.dueDate || "N/A"}</p>
-              <p><strong>Delivery Option:</strong> {gadget.deliveryOption || "N/A"}</p>
-              {gadget.deliveryOption === "Delivery" && (
-                <p><strong>Delivery Cost:</strong> ₹ {gadget.deliveryCost || "N/A"}</p>
+              {/* Days for Rent */}
+              <p><strong>Days for Rent:</strong> {gadget.days_for_rent || "N/A"}</p>
+
+              {/* Delivery Options */}
+              <p>
+                <strong>Delivery Option:</strong>{" "}
+                {gadget.deliveryOptions?.delivery
+                  ? "Pickup & Delivery"
+                  : "Pickup Only"}
+              </p>
+
+              {/* Show delivery cost only if delivery is true */}
+              {gadget.deliveryOptions?.delivery && (
+                <p><strong>Delivery Cost:</strong> ₹ {gadget.deliveryOptions.deliveryCost || "N/A"}</p>
               )}
+
               <p><strong>Category:</strong> {gadget.category || "N/A"}</p>
               <p><strong>Location:</strong> {gadget.location || "N/A"}</p>
-              <p><strong>Availability:</strong> {gadget.status === "Available" ? "Available" : "Rented"}</p>
+              <p><strong>Availability:</strong> {gadget.availability === "Available" ? "Available" : "Rented"}</p>
             </div>
           </div>
+
         </div>
       </div>
     </div>
-    
+
   );
 };
 

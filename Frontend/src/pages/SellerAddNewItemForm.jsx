@@ -196,17 +196,24 @@
 import React, { useState, useEffect } from "react";
 import { FiUpload } from "react-icons/fi";
 import { API_BASE_URL } from "../config";
+import toast from "react-hot-toast";
 
 import axios from "axios";
 
 const SellerAddItemForm = ({ itemData, onClose, onSubmit }) => {
+    const [useDefaultAddress, setUseDefaultAddress] = useState(false);
+    const defaultAddress = "123 Main Street, Pune"; // Replace with actual prop or fetch
+
     const [formData, setFormData] = useState({
         name: "",
         description: "",
         price: "",
         days_for_rent: "", // replaced dueDate
-        deliveryOption: "Pickup",
-        deliveryCost: "",
+        deliveryOptions: {
+            pickup: true,
+            delivery: false,
+            deliveryCost: 0,
+        },
         images: [],
         category: "",
         location: "",
@@ -214,6 +221,28 @@ const SellerAddItemForm = ({ itemData, onClose, onSubmit }) => {
     });
 
     const [loading, setLoading] = useState(false);
+
+    const handleDefaultAddressSelect = async () => {
+        const ownerId = localStorage.getItem("ownerId");
+
+        try {
+            const res = await axios.get(`${API_BASE_URL}/users/profile/${ownerId}`);
+            const fetchedAddress = res.data.address;
+            console.log("Fetched Address:", fetchedAddress);
+            if (fetchedAddress && fetchedAddress.trim() !== "") {
+                setUseDefaultAddress(true);
+                setFormData((prev) => ({ ...prev, location: fetchedAddress }));
+            } else {
+                toast.error("Please complete your profile first!");
+                // Automatically switch back to manual entry
+                setUseDefaultAddress(false);
+            }
+        } catch (err) {
+            console.error("Error fetching default address", err);
+            toast.error("Failed to fetch address. Please try again.");
+            setUseDefaultAddress(false);
+        }
+    };
 
     useEffect(() => {
         if (itemData) {
@@ -224,8 +253,7 @@ const SellerAddItemForm = ({ itemData, onClose, onSubmit }) => {
                 description: itemData.description || "",
                 availability: itemData.status || "Available",
                 days_for_rent: itemData.days_for_rent || "",
-                deliveryOption: itemData.deliveryOption || "Pickup",
-                deliveryCost: itemData.deliveryCost || "",
+                deliveryOptions: itemData.deliveryOptions || { pickup: true, delivery: false, deliveryCost: 0 },
                 images: itemData.images || [],
                 location: itemData.location || "",
             });
@@ -235,6 +263,17 @@ const SellerAddItemForm = ({ itemData, onClose, onSubmit }) => {
     const handleChange = (e) => {
         const { name, value } = e.target;
         setFormData((prev) => ({ ...prev, [name]: value }));
+    };
+    const handleDeliveryOptionChange = (e) => {
+        const { name, type, value, checked } = e.target;
+
+        setFormData((prev) => ({
+            ...prev,
+            deliveryOptions: {
+                ...prev.deliveryOptions,
+                [name]: type === "checkbox" ? checked : name === "deliveryCost" ? Number(value) : value
+            }
+        }));
     };
 
     const handleImageUpload = (e) => {
@@ -303,7 +342,7 @@ const SellerAddItemForm = ({ itemData, onClose, onSubmit }) => {
                 ...formData,
                 images: allImages,
                 days_for_rent: Number(formData.days_for_rent), // Convert to number
-                deliveryCost: formData.deliveryOption === "Delivery" ? Number(formData.deliveryCost) : 0,
+                // deliveryCost: formData.deliveryOption === "Delivery" ? Number(formData.deliveryCost) : 0,
             };
 
             onSubmit(submittedData);
@@ -316,6 +355,7 @@ const SellerAddItemForm = ({ itemData, onClose, onSubmit }) => {
             setLoading(false); // Hide loader
         }
     };
+
 
     return (
         <div className="fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-50 backdrop-blur-lg overflow-auto p-4">
@@ -361,15 +401,57 @@ const SellerAddItemForm = ({ itemData, onClose, onSubmit }) => {
                     </div>
 
                     <div className="flex flex-col">
-                        <label className="font-medium">Location</label>
-                        <input
-                            type="text"
-                            name="location"
-                            value={formData.location}
-                            onChange={handleChange}
-                            className="w-full p-2 border border-gray-300 rounded transition-all focus:border-blue-500 focus:ring-2 focus:ring-blue-300"
-                            required
-                        />
+                        <label className="font-medium mb-1">Location</label>
+
+                        <div className="flex items-center space-x-4 mb-2">
+                            <label className="flex items-center space-x-1">
+                                <input
+                                    type="radio"
+                                    checked={useDefaultAddress}
+                                    onChange={() => {
+                                        setUseDefaultAddress(true);
+                                        handleDefaultAddressSelect();
+                                    }}
+                                />
+                                <span>Use Default Address</span>
+                            </label>
+                            <label className="flex items-center space-x-1">
+                                <input
+                                    type="radio"
+                                    checked={!useDefaultAddress}
+                                    onChange={() => {
+                                        setUseDefaultAddress(false);
+                                        setFormData((prev) => ({
+                                            ...prev,
+                                            location: "",
+                                        }));
+                                    }}
+                                />
+                                <span>Enter New Address</span>
+                            </label>
+                        </div>
+
+                        {!useDefaultAddress && (
+                            <input
+                                type="text"
+                                name="location"
+                                value={formData.location}
+                                onChange={(e) =>
+                                    setFormData((prev) => ({
+                                        ...prev,
+                                        location: e.target.value,
+                                    }))
+                                }
+                                className="w-full p-2 border border-gray-300 rounded transition-all focus:border-blue-500 focus:ring-2 focus:ring-blue-300"
+                                required
+                            />
+                        )}
+
+                        {useDefaultAddress && formData.location && (
+                            <div className="p-2 border rounded bg-gray-100 text-sm">
+                                {formData.location}
+                            </div>
+                        )}
                     </div>
 
                     <div className="flex flex-col">
@@ -424,26 +506,37 @@ const SellerAddItemForm = ({ itemData, onClose, onSubmit }) => {
                         Delivery Option
                     </label>
                     <select
-                        name="deliveryOption"
-                        value={formData.deliveryOption}
-                        onChange={handleChange}
+                        name="delivery"
+                        value={formData.deliveryOptions.delivery ? "Delivery" : "Pickup"}
+                        onChange={(e) => {
+                            const isDelivery = e.target.value === "Delivery";
+                            setFormData((prev) => ({
+                                ...prev,
+                                deliveryOptions: {
+                                    ...prev.deliveryOptions,
+                                    delivery: isDelivery,
+                                    pickup: true  // Pickup is always true if delivery is selected
+                                }
+                            }));
+                        }}
                         className="mb-4 block w-full p-2 border rounded"
                     >
-                        <option value="Pickup">Pickup</option>
-                        <option value="Delivery">Delivery</option>
+                        <option value="Pickup">Pickup Only</option>
+                        <option value="Delivery">Delivery (includes Pickup)</option>
                     </select>
 
-                    {formData.deliveryOption === "Delivery" && (
+                    {formData.deliveryOptions.delivery && (
                         <div className="flex flex-col">
                             <label className="font-medium">Delivery Cost</label>
                             <input
                                 type="number"
                                 name="deliveryCost"
-                                value={formData.deliveryCost}
-                                onChange={handleChange}
+                                value={formData.deliveryOptions.deliveryCost}
+                                onChange={handleDeliveryOptionChange}
                                 className="w-full p-2 border border-gray-300 rounded transition-all focus:border-blue-500 focus:ring-2 focus:ring-blue-300"
                                 required
                             />
+                            <p className="text-sm text-gray-500 mt-1">Includes pickup as well</p>
                         </div>
                     )}
 
@@ -501,6 +594,3 @@ const SellerAddItemForm = ({ itemData, onClose, onSubmit }) => {
 };
 
 export default SellerAddItemForm;
-
-
-// but what about the dueDate fiedl in the seller form , we discussed that instead of that there should eb days_for_rent so please tell me where to make changes ,and also automatic due_date willl be calculated where in backend like in buyer side's backend function or in seller ? -

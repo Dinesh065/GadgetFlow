@@ -39,20 +39,10 @@ const itemSchema = new mongoose.Schema({
     category: { type: String, required: true },
     description: { type: String },
     location: { type: String, required: true },
-    deliveryOption: {
-        type: String,
-        enum: ["Pickup", "Delivery"],
-        required: true
-    },
-    deliveryCost: {
-        type: Number,
-        default: 0,
-        validate: {
-            validator: function (val) {
-                return this.deliveryOption === "Delivery" ? val > 0 : val === 0;
-            },
-            message: "Delivery cost must be greater than 0 if delivery option is 'Delivery'"
-        }
+    deliveryOptions: {
+        pickup: { type: Boolean, default: true },
+        delivery: { type: Boolean, default: false },
+        deliveryCost: { type: Number, default: 0 }
     },
 
     ownerId: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
@@ -61,6 +51,22 @@ const itemSchema = new mongoose.Schema({
     actionTaken: { type: Boolean, default: false }
 
 }, { timestamps: true });
+
+
+itemSchema.pre('validate', function (next) {
+    const { delivery, deliveryCost } = this.deliveryOptions || {};
+
+    if (delivery && (!deliveryCost || deliveryCost <= 0)) {
+        return next(new Error("Delivery cost must be greater than 0 if delivery is selected"));
+    }
+
+    if (!delivery && deliveryCost > 0) {
+        return next(new Error("Delivery cost must be 0 if delivery is not selected"));
+    }
+
+    next();
+});
+
 
 export const Item = mongoose.model("Item", itemSchema);
 

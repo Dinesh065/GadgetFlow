@@ -5,6 +5,7 @@ import { Item } from "../models/item.model.js";
 import { upload } from "../middlewares/multer.middleware.js";
 import { uploadOnCloudinary } from "../utils/cloudinary.js";
 import { verifyJWT } from "../middlewares/auth.middleware.js";
+import { User } from "../models/user.model.js";
 
 const router = Router();
 
@@ -45,21 +46,23 @@ router.post("/addNewItems", async (req, res) => {
             description,
             location,
             ownerId,
-            deliveryOption,
-            deliveryCost = 0
+            deliveryOptions
         } = req.body;
 
         if (!name || !images || images.length < 3 || !price || !category || !location || !ownerId) {
             return res.status(400).json({ message: "Missing required fields or insufficient images." });
         }
-        if (!["Pickup", "Delivery"].includes(deliveryOption)) {
-            return res.status(400).json({ message: "Invalid delivery option." });
+        if (!deliveryOptions || typeof deliveryOptions.delivery !== "boolean" || typeof deliveryOptions.pickup !== "boolean") {
+            return res.status(400).json({ message: "Invalid delivery options." });
         }
 
-        if (deliveryOption === "Delivery" && (!deliveryCost || deliveryCost <= 0)) {
-            return res.status(400).json({ message: "Delivery cost is required for delivery option." });
+        if (deliveryOptions.delivery && (!deliveryOptions.deliveryCost || deliveryOptions.deliveryCost <= 0)) {
+            return res.status(400).json({ message: "Delivery cost must be greater than 0 if delivery is selected." });
         }
 
+        if (!deliveryOptions.delivery && deliveryOptions.deliveryCost > 0) {
+            return res.status(400).json({ message: "Delivery cost must be 0 if delivery is not selected." });
+        }
 
         const newItem = new Item({
             name,
@@ -74,8 +77,7 @@ router.post("/addNewItems", async (req, res) => {
             description,
             location,
             ownerId,
-            deliveryOption,
-            deliveryCost
+            deliveryOptions
         });
 
         const savedItem = await newItem.save();

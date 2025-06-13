@@ -100,6 +100,21 @@ router.post("/login", async (req, res) => {
     }
 });
 
+//For getting address of user profile for 'use default address' in add item form
+router.get("/profile/:userId", async (req, res) => {
+  try {
+    const user = await User.findById(req.params.userId);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    return res.status(200).json({ address: user.address || null });
+  } catch (err) {
+    return res.status(500).json({ message: "Error fetching user profile", error: err.message });
+  }
+});
+
+
 router.get('/fetchProfileData', verifyJWT, async (req, res) => {
     try {
         // `req.user` must be set by your auth middleware

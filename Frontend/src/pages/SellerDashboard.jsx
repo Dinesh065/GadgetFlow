@@ -98,13 +98,14 @@ const SellerDashboard = () => {
 
     const handleAddItem = async (newItem) => {
         try {
+            console.log("Adding new item:", newItem);
             const owner_id = localStorage.getItem("ownerId");
             const response = await axios.post(`${API_BASE_URL}/items/addNewItems`, {
                 ...newItem,
                 price: parseInt(newItem.price.replace(/[^\d]/g, ""), 10),
                 ownerId: owner_id, // Use actual ownerId from logged-in user
                 status: newItem.availability || "Available", // status from form
-                deliveryOption: newItem.deliveryOption || "pickup" // fallback default
+                deliveryOptions: newItem.deliveryOptions
             });
             setItems((prevItems) => [...prevItems, response.data]);
             setIsModalOpen(false);
