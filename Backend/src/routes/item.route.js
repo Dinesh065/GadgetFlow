@@ -4,6 +4,7 @@ import fs from "fs";
 import { Item } from "../models/item.model.js";
 import { upload } from "../middlewares/multer.middleware.js";
 import { uploadOnCloudinary } from "../utils/cloudinary.js";
+import { verifyJWT } from "../middlewares/auth.middleware.js";
 
 const router = Router();
 
@@ -35,9 +36,10 @@ router.post("/addNewItems", async (req, res) => {
             images,
             price,
             status = "Available",
-            requests = 0,
+            requests = [],
             rentalDate = null,
-            dueDate = null,
+            // dueDate = null,
+            days_for_rent = 1, // Default to 1 day if not provided
             renter = null,
             category,
             description,
@@ -66,7 +68,7 @@ router.post("/addNewItems", async (req, res) => {
             status,
             requests,
             rentalDate,
-            dueDate,
+            days_for_rent,
             renter,
             category,
             description,
@@ -134,70 +136,103 @@ router.get('/getItemsByOwner/:ownerId', async (req, res) => {
     }
 });
 
+router.get('/getItemsForML', verifyJWT, async (req, res) => {
+    try {
+        const sellerId = req.user.id; // Make sure auth middleware sets this
+
+        const items = await Item.find({ ownerId: sellerId })
+            .populate("ownerId", "name email");
+
+        res.status(200).json({ items });
+    } catch (error) {
+        console.error("Failed to fetch items for seller:", error.message);
+        res.status(500).json({ error: "Failed to fetch items." });
+    }
+});
+
+router.put('/:id', verifyJWT, async (req, res) => {
+    try {
+        const itemId = req.params.id;
+        const updatedData = req.body;
+
+        const updatedItem = await Item.findByIdAndUpdate(
+            itemId,
+            { $set: updatedData },
+            { new: true, runValidators: true }
+        );
+
+        if (!updatedItem) {
+            return res.status(404).json({ message: 'Item not found' });
+        }
+
+        return res.status(200).json({
+            message: 'Item updated successfully',
+            updatedItem,
+        });
+    } catch (error) {
+        console.error('Error updating item:', error.message);
+        return res.status(500).json({ message: 'Internal server error' });
+    }
+});
+
+router.patch('/:id/status', verifyJWT, async (req, res) => {
+    const { id } = req.params;
+    const { availability } = req.body;
+    console.log("Updating item status:", id, availability);
+    try {
+        const updated = await Item.findByIdAndUpdate(
+            id,
+            { status: availability },
+            { new: true }
+        );
+
+        if (!updated) return res.status(404).json({ message: "Item not found" });
+
+        res.status(200).json({ availability: updated.status });
+    } catch (err) {
+        res.status(500).json({ message: "Server error" });
+    }
+});
+
+router.delete('/:id', verifyJWT, async (req, res) => {
+    const { id } = req.params;
+
+    try {
+        const deleted = await Item.findByIdAndDelete(id);
+        if (!deleted) return res.status(404).json({ message: "Item not found" });
+
+        res.status(200).json({ message: "Item deleted" });
+    } catch (err) {
+        res.status(500).json({ message: "Server error" });
+    }
+});
+
+router.post('/delete-multiple', verifyJWT, async (req, res) => {
+    const { ids } = req.body;
+    try {
+        const result = await Item.deleteMany({ _id: { $in: ids } });
+        res.status(200).json({ message: `${result.deletedCount} items deleted` });
+    } catch (err) {
+        res.status(500).json({ message: "Batch delete error" });
+    }
+});
+
+// routes/requests.js
+router.get('/requests/:itemId', async (req, res) => {
+    try {
+        const itemId = req.params.itemId;
+
+        const item = await Item.findById(itemId).populate('requests.buyerId', 'name image');
+
+        if (!item) {
+            return res.status(404).json({ message: 'Item not found' });
+        }
+
+        return res.status(200).json(item.requests); // send just the requests array
+    } catch (error) {
+        console.error('Error fetching buyer requests:', error);
+        return res.status(500).json({ message: 'Server error while fetching buyer requests' });
+    }
+});
+
 export default router;
-
-
-// router.get("/", async (req, res) => {
-//     try {
-//         const newItem = new Item(req.body);
-//         const savedItem = await newItem.save();
-//         res.status(201).json(savedItem);
-//     } catch (error) {
-//         res.status(400).json({ message: error.message });
-//     }
-// });
-
-// // 🟡 Update item status
-// router.put("/updateItem/:id", async (req, res) => {
-//     try {
-//         const updatedItem = await Item.findByIdAndUpdate(req.params.id, req.body, { new: true });
-//         res.json(updatedItem);
-//     } catch (err) {
-//         res.status(500).json({ error: err.message });
-//     }
-// });
-
-// // 🔴 Delete item
-// router.delete("/deleteItem/:id", async (req, res) => {
-//     try {
-//         await Item.findByIdAndDelete(req.params.id);
-//         res.json({ message: "Item deleted successfully" });
-//     } catch (err) {
-//         res.status(500).json({ error: err.message });
-//     }
-// });
-
-// // 📊 Get profit & rental statistics for graphs
-// router.get("/stats", async (req, res) => {
-//     try {
-//         const allItems = await Item.find();
-
-//         // Monthly Profit Calculation (Assuming price is in ₹)
-//         const profitData = {};
-//         allItems.forEach(item => {
-//             const month = new Date(item.rentalDate).toLocaleString("default", { month: "short" });
-//             profitData[month] = (profitData[month] || 0) + item.price;
-//         });
-
-//         // Format data for frontend
-//         const formattedProfitData = Object.keys(profitData).map(month => ({
-//             name: month,
-//             value: profitData[month]
-//         }));
-
-//         // Rental Count Calculation
-//         const rentalData = allItems.reduce((acc, item) => {
-//             acc[item.name] = (acc[item.name] || 0) + (item.status === "Rented" ? 1 : 0);
-//             return acc;
-//         }, {});
-
-//         const formattedRentalData = Object.keys(rentalData).map(name => ({
-//             name,
-//             value: rentalData[name]
-//         }));
-
-//         res.json({ profitData: formattedProfitData, rentalData: formattedRentalData });
-//     } catch (err) {
-//         res.status(500).json({ error: err.message });
-//     }
-// });

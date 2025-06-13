@@ -1,6 +1,6 @@
 import { FaTimes, FaChevronLeft, FaChevronRight } from "react-icons/fa";
 import { useState, useEffect } from "react";
-
+ 
 const DetailCard = ({ gadget = {}, onClose }) => {
   if (!gadget || Object.keys(gadget).length === 0) return null;
 
@@ -82,8 +82,8 @@ const DetailCard = ({ gadget = {}, onClose }) => {
                   alt={`Thumbnail ${idx}`}
                   onClick={() => handleThumbnailClick(idx)}
                   className={`w-20 h-20 object-cover rounded-lg border-4 cursor-pointer transition-transform duration-300 ${idx === currentImageIndex
-                      ? "border-gray-500 scale-110 ring-2 ring-gray-300"
-                      : "border-gray-300 hover:scale-105"
+                    ? "border-gray-500 scale-110 ring-2 ring-gray-300"
+                    : "border-gray-300 hover:scale-105"
                     }`}
                 />
               ))}
@@ -110,6 +110,7 @@ const DetailCard = ({ gadget = {}, onClose }) => {
         </div>
       </div>
     </div>
+    
   );
 };
 

@@ -7,6 +7,11 @@ import BuyerDashboard from "./pages/BuyerDashboard.jsx";
 import SellerDashboard from "./pages/SellerDashboard.jsx";
 import BuyerNavbar from "./components/BuyerNavbar.jsx";
 import SellerNavbar from "./components/SellerNavbar.jsx";
+import OrderListing from "./components/OrderListing.jsx";
+import FloatingIcons from "./components/FloatingIcons.jsx";
+import RentalCalendar from "./pages/RentalCalendar.jsx";
+import ProfilePage from "./pages/ProfilePage.jsx";
+import { Toaster } from 'react-hot-toast';
 
 function App() {
   const [userRole, setUserRole] = useState(localStorage.getItem("userRole") || null);
@@ -24,7 +29,7 @@ function App() {
     localStorage.removeItem("userRole");
     localStorage.removeItem("authToken");
     setUserRole(null);
-    window.location.href = "/login";  
+    window.location.href = "/login";
   };
 
   if (loading) {
@@ -33,20 +38,24 @@ function App() {
 
   return (
     <Router>
+      <Toaster position="top-right" toastOptions={{ duration: 3000 }} /> {/* ✅ Add Toaster here */}
       <MainContent userRole={userRole} handleLogout={handleLogout} setUserRole={setUserRole} />
     </Router>
   );
 }
 
 function MainContent({ userRole, handleLogout, setUserRole }) {
-  const location = useLocation(); 
+  const location = useLocation();
 
   const hideNavbar = ["/", "/login", "/signup"].includes(location.pathname);
+  const hideFloatingIcons = hideNavbar;
 
   return (
     <>
       {!hideNavbar && userRole === "buyer" && <BuyerNavbar onLogout={handleLogout} />}
       {!hideNavbar && userRole === "seller" && <SellerNavbar className="bg-black" onLogout={handleLogout} />}
+
+      {!hideFloatingIcons && <FloatingIcons />}
 
       <Routes>
         {/* Public Routes */}
@@ -62,6 +71,18 @@ function MainContent({ userRole, handleLogout, setUserRole }) {
         <Route
           path="/seller-dashboard"
           element={userRole === "seller" ? <SellerDashboard /> : <Navigate to="/login" />}
+        />
+        <Route
+          path="/manage-listings"
+          element={userRole === "seller" ? <OrderListing /> : <Navigate to="/login" />}
+        />
+        <Route
+          path="/rental-calendar"
+          element={userRole === "seller" ? <RentalCalendar /> : <Navigate to="/login" />}
+        />
+        <Route
+          path="/seller-profile"
+          element={userRole === "seller" ? <ProfilePage /> : <Navigate to="/login" />}
         />
 
         {/* Add additional routes here -> */}

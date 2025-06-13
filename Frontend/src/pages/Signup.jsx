@@ -1,6 +1,7 @@
-import React, { useState } from "react";
+ import React, { useState } from "react";
 import axios from "axios";
 import { Link, useNavigate } from "react-router-dom";
+import { API_BASE_URL } from "../config";
 
 const Signup = () => {
   const navigate = useNavigate();
@@ -25,7 +26,7 @@ const Signup = () => {
     setSuccess("");
 
     try {
-      const url = "http://localhost:8000/api/v1/users/signup"; // Update with your API
+      const url = `${API_BASE_URL}/users/signup`; // Update with your API
       const response = await axios.post(url, formData);
 
       // Store the role for validation at login

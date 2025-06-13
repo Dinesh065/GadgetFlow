@@ -3,8 +3,12 @@ import { User } from "../models/user.model.js";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import zod from "zod";
-
+import { verifyJWT } from "../middlewares/auth.middleware.js";
+import multer from "multer";
+import { upload } from "../middlewares/multer.middleware.js";
+import { uploadOnCloudinary } from "../utils/cloudinary.js";
 const router = Router();
+import fs from "fs";
 
 // ✅ Validation schema
 const signupSchema = zod.object({
@@ -86,7 +90,7 @@ router.post("/login", async (req, res) => {
             success: true,
             message: "Logged in successfully",
             token,
-            ownerId: user._id ,
+            ownerId: user._id,
             role: user.role
         });
 
@@ -96,4 +100,135 @@ router.post("/login", async (req, res) => {
     }
 });
 
+router.get('/fetchProfileData', verifyJWT, async (req, res) => {
+    try {
+        // `req.user` must be set by your auth middleware
+        const userId = req.user?._id;
+
+        if (!userId) {
+            return res.status(401).json({ message: "Unauthorized" });
+        }
+
+        const user = await User.findById(userId).select("fullName profileImage");
+
+        if (!user) {
+            return res.status(404).json({ message: "User not found" });
+        }
+
+        res.json({
+            fullName: user.fullName,
+            profileImage: user.profileImage || "/images/defaultProfile.png", // fallback
+        });
+    } catch (error) {
+        console.error("Error fetching user profile:", error);
+        res.status(500).json({ message: "Server error" });
+    }
+});
+
+router.get("/profile/fetchProfileData", verifyJWT, async (req, res) => {
+    try {
+        const user = await User.findById(req.user._id).select(
+            "-password -__v" // Exclude sensitive fields like password and Mongoose metadata
+        );
+
+        if (!user) {
+            return res.status(404).json({ message: "User not found" });
+        }
+
+        res.status(200).json({ user });
+    } catch (err) {
+        console.error("Error fetching profile:", err);
+        res.status(500).json({ message: "Server error" });
+    }
+});
+
+router.post(
+    "/profile/update",
+    verifyJWT,
+    upload.fields([
+        { name: "profileImage", maxCount: 1 },
+        { name: "aadhaarDoc", maxCount: 1 },
+    ]),
+    async (req, res) => {
+        try {
+            const user = await User.findById(req.user._id);
+
+            if (!user) return res.status(404).json({ message: "User not found" });
+
+            // Update basic text fields
+            const fields = [
+                "fullName",
+                "contactNumber",
+                "alternateContact",
+                "address",
+                "pickupLocation",
+                "bio",
+            ];
+            fields.forEach((field) => {
+                if (req.body[field]) user[field] = req.body[field];
+            });
+
+            // Password change
+            const { newPassword, confirmPassword } = req.body;
+
+            if (newPassword && confirmPassword) {
+                if (newPassword !== confirmPassword) {
+                    return res.status(400).json({ message: "Passwords do not match" });
+                }
+                const salt = await bcrypt.genSalt(10);
+                user.password = await bcrypt.hash(newPassword, salt);
+            }
+
+            // Handle file uploads to Cloudinary
+            const uploads = {};
+
+            const uploadField = async (fieldName) => {
+                try {
+                    if (req.files?.[fieldName]?.[0]) {
+                        const file = req.files[fieldName][0];
+                        const result = await uploadOnCloudinary(file.path);
+                        if (result?.secure_url) {
+                            uploads[fieldName] = result.secure_url;
+                            fs.unlinkSync(file.path);
+                        }
+                    }
+                } catch (error) {
+                    console.error(`Failed to upload ${fieldName}:`, error);
+                }
+            };
+
+
+            await uploadField("profileImage");
+            await uploadField("aadhaarDoc");
+
+            // Set uploaded URLs
+            if (uploads.profileImage) user.profileImage = uploads.profileImage;
+            if (uploads.aadhaarDoc) user.aadhaarDoc = uploads.aadhaarDoc;
+
+            await user.save();
+
+            res.status(200).json({ message: "Profile updated successfully" });
+        } catch (err) {
+            console.error("Profile update error:", err);
+            res.status(500).json({ message: "Server error" });
+        }
+    }
+);
+
+router.delete("/profile/remove-aadhaar", verifyJWT, async (req, res) => {
+    try {
+        const user = await User.findById(req.user._id);
+        if (!user || !user.aadhaarDoc) {
+            return res.status(404).json({ message: "Document not found" });
+        }
+
+        user.aadhaarDoc = null;
+        await user.save();
+
+        res.status(200).json({ message: "Aadhaar document removed" });
+    } catch (err) {
+        console.error("Aadhaar remove error:", err);
+        res.status(500).json({ message: "Server error" });
+    }
+});
 export default router;

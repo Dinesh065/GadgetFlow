@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import axios from "axios";
 import { Link, useNavigate } from "react-router-dom";
+import { API_BASE_URL } from "../config";
 
 const Login = ({ setUserRole }) => {
   const navigate = useNavigate();
@@ -22,11 +23,11 @@ const Login = ({ setUserRole }) => {
     }
 
     try {
-      const url = "http://localhost:8000/api/v1/users/login";
+      const url = `${API_BASE_URL}/users/login`;
       const response = await axios.post(url, { ...data, role });
       const { token, role: userRole, ownerId } = response.data;
-
-      localStorage.setItem("token", response.data.data);
+      console.log(token);
+      localStorage.setItem("token", token);
       localStorage.setItem("ownerId", ownerId);
       localStorage.setItem("userRole", role);
 
