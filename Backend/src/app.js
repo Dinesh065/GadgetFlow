@@ -6,6 +6,7 @@ import dotenv from "dotenv"
 import itemRoutes from "./routes/item.route.js";
 import overdueRoutes from "./routes/overdue.route.js";
 import rentalRoutes from "./routes/rental.route.js";
+import buyerRoutes from "./routes/buyer.routes.js";
 // import noti from "./routes/notification.route.js";
 dotenv.config();
 
@@ -27,5 +28,6 @@ app.use("/api/v1/users",userRouter)
 app.use("/api/v1/items",itemRoutes) 
 app.use("/api/v1/item_overdues",overdueRoutes) 
 app.use("/api/v1/rentals",rentalRoutes) 
+app.use("/api/v1/buyers",buyerRoutes)
 // app.use("/api/v1/notifications",noti) 
 export { app }

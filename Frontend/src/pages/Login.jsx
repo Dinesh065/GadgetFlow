@@ -14,32 +14,31 @@ const Login = ({ setUserRole }) => {
   };
 
   const handleSubmit = async (event) => {
-    event.preventDefault();
+  event.preventDefault();
+  setError("");
 
-    const storedSignupRole = localStorage.getItem(`signupRole_${data.email}`);
-    if (storedSignupRole !== role) {
-      setError("Role mismatch! You must log in with the same role you signed up with.");
-      return;
+  try {
+    const url = `${API_BASE_URL}/users/login`;
+    const response = await axios.post(url, { ...data, role });
+    const { token, role: userRole, ownerId } = response.data;
+
+    localStorage.setItem("token", token);
+    localStorage.setItem("ownerId", ownerId);
+    localStorage.setItem("userRole", userRole); // Use value returned by backend
+
+    setUserRole(userRole); // Update role state in app
+
+    navigate(userRole === "buyer" ? "/buyer-dashboard" : "/seller-dashboard");
+
+  } catch (error) {
+    if (error.response) {
+      setError(error.response.data.message); // Will catch "Role mismatch!" from backend if any
+    } else {
+      setError("Something went wrong. Please try again later.");
     }
+  }
+};
 
-    try {
-      const url = `${API_BASE_URL}/users/login`;
-      const response = await axios.post(url, { ...data, role });
-      const { token, role: userRole, ownerId } = response.data;
-      console.log(token);
-      localStorage.setItem("token", token);
-      localStorage.setItem("ownerId", ownerId);
-      localStorage.setItem("userRole", role);
-
-      setUserRole(role);
-
-      navigate(role === "buyer" ? "/buyer-dashboard" : "/seller-dashboard");
-    } catch (error) {
-      if (error.response) {
-        setError(error.response.data.message);
-      }
-    }
-  };
 
   return (
     <div className="bg-gradient-to-br from-blue-500 to-indigo-700 min-h-screen flex items-center justify-center p-4">
