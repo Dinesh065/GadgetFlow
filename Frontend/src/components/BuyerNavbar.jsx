@@ -1,78 +1,66 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { Link } from "react-router-dom";
-import { Menu, X, Home, ShoppingCart, Heart, Package, Bell, LogOut } from "lucide-react"; // Using Lucide icons
+import { FaHome, FaSearch, FaUser, FaShoppingCart, FaBell, FaShoppingBag, FaBars, FaTimes } from "react-icons/fa";
+import NotificationDropdown from "./NotificationDropdown";
 
-const BuyerNavbar = ({ onLogout }) => {
-  const [isOpen, setIsOpen] = useState(false); // State for mobile menu
+const Navbar = () => {
+  const [isOpen, setIsOpen] = useState(false);
 
   return (
-    <nav className="bg-blue-600 shadow-md">
-      <div className="mx-auto flex justify-between items-center p-4 relative">
-        
-        {/* Logo & Brand Name */}
-        <div className="flex items-center space-x-2">
-          <img src="/images/Logo.png" alt="GadgetFlow Logo" className="h-10 w-auto" />
-          <h1 className="text-white text-2xl font-bold">GadgetFlow</h1>
-        </div>
+    <nav className="bg-white fixed top-0 left-0 h-20 px-6 lg:px-12 flex items-center justify-between z-50 w-full">
 
-        {/* Desktop Navbar Links */}
-        <div className="hidden md:flex space-x-6">
-          <NavItem to="/buyer-dashboard" icon={<Home size={20} />} text="Dashboard" />
-          <NavItem to="/cart" icon={<ShoppingCart size={20} />} text="Cart & Checkout" />
-          <NavItem to="/wishlist" icon={<Heart size={20} />} text="Wishlist" />
-          <NavItem to="/orders" icon={<Package size={20} />} text="Order History" />
-          <NavItem to="/notifications" icon={<Bell size={20} />} text="Notifications" />
-        </div>
-
-        {/* Logout Button for Desktop View */}
-        <div className="hidden md:block">
-          <button 
-            onClick={onLogout} // ✅ Logout works now
-            className="border-2 border-white px-4 py-2 rounded-lg text-white hover:bg-white hover:text-blue-600 transition duration-300 flex items-center space-x-2"
-          >
-            <LogOut size={20} />
-            <span>Logout</span>
-          </button>
-        </div>
-
-        {/* Hamburger Menu Button */}
-        <button className="md:hidden text-white" onClick={() => setIsOpen(!isOpen)}>
-          {isOpen ? <X size={30} /> : <Menu size={30} />}
+      {/* Left Section - Logo & Toggle Button */}
+      <div className="flex items-center gap-12">
+        <button onClick={() => setIsOpen(!isOpen)} className="lg:hidden text-2xl text-gray-700">
+          {isOpen ? <FaTimes /> : <FaBars />}
         </button>
+        <Link to="/buyer-dashboard" className="text-green-700 font-bold text-2xl flex items-center">
+          <span className="mr-2 text-3xl">🛒</span> GadgetFlow
+        </Link>
       </div>
 
-      {/* Mobile Dropdown Menu */}
-      {isOpen && (
-        <div className="md:hidden flex flex-col bg-blue-500 space-y-4 p-4">
-          <NavItem to="/buyer-dashboard" icon={<Home size={20} />} text="Dashboard" mobile />
-          <NavItem to="/cart" icon={<ShoppingCart size={20} />} text="Cart & Checkout" mobile />
-          <NavItem to="/wishlist" icon={<Heart size={20} />} text="Wishlist" mobile />
-          <NavItem to="/orders" icon={<Package size={20} />} text="Order History" mobile />
-          <NavItem to="/notifications" icon={<Bell size={20} />} text="Notifications" mobile />
-          
-          {/* Logout Button for Mobile View */}
-          <button 
-            onClick={onLogout} // ✅ Logout works for mobile too
-            className="border-2 border-white px-4 py-2 rounded-lg text-white hover:bg-white hover:text-blue-600 transition duration-300 flex items-center space-x-2"
-          >
-            <LogOut size={20} />
-            <span>Logout</span>
-          </button>
+      {/* Right Section - Account & Cart (Hidden on Mobile) */}
+      <div className="hidden lg:flex items-center gap-8">
+          <Link to="/buyer-dashboard" className="flex items-center gap-2 text-gray-700 hover:text-black transition text-lg">
+            <FaHome className="text-xl" /> Browse Items
+          </Link>
+          <Link to="/orders" className="flex items-center gap-2 text-base text-gray-700 hover:text-black transition">
+          <FaShoppingBag className="text-xl" /> Orders
+          </Link>
+          <Link to="/cart" className="flex items-center gap-2 text-gray-700 hover:text-black transition text-lg">
+            <FaShoppingCart className="text-xl" /> Cart
+          </Link>
+        <div className="text-base text-gray-700 hover:text-black transition flex items-center gap-2">
+         <NotificationDropdown />
         </div>
-      )}
+        <Link to="/account" className="flex items-center gap-2 text-gray-700 hover:text-black transition text-lg">
+          <FaUser className="text-xl" /> Account
+        </Link>
+      </div>
+
+      {/* Mobile Menu (Visible when isOpen is true) */}
+      <div className={`lg:hidden fixed top-20 left-0 w-full bg-white shadow-md transition-transform transform ${isOpen ? "translate-x-0" : "-translate-x-full"} p-6`}>
+        <div className="flex flex-col gap-4">
+          <Link to="/" className="text-gray-700 hover:text-black transition text-lg flex items-center gap-2">
+            <FaHome className="text-xl" /> Browse Items
+          </Link>
+          <Link to="/orders" className="text-gray-700 hover:text-black transition text-lg flex items-center gap-2">
+            <FaShoppingBag className="text-xl" /> Orders
+          </Link>
+          <Link to="/cart" className="text-gray-700 hover:text-black transition text-lg flex items-center gap-2">
+            <FaShoppingCart className="text-xl" /> Cart
+          </Link>
+          <div className="text-gray-700 hover:text-black transition text-lg flex items-center gap-2">
+            <NotificationDropdown />
+          </div>
+          <Link to="/account" className="text-gray-700 hover:text-black transition text-lg flex items-center gap-2">
+            <FaUser className="text-xl" /> Account
+          </Link>
+        </div>
+      </div>
+
     </nav>
   );
 };
 
-/* Reusable Nav Item Component */
-const NavItem = ({ to, icon, text, mobile }) => (
-  <Link 
-    to={to} 
-    className={`flex items-center space-x-2 text-white hover:text-gray-300 transition-all ${mobile ? "py-2 px-4" : ""}`}
-  >
-    {icon}
-    <span>{text}</span>
-  </Link>
-);
-
-export default BuyerNavbar;
+export default Navbar;

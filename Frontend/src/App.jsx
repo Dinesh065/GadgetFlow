@@ -11,6 +11,9 @@ import OrderListing from "./components/OrderListing.jsx";
 import FloatingIcons from "./components/FloatingIcons.jsx";
 import RentalCalendar from "./pages/RentalCalendar.jsx";
 import ProfilePage from "./pages/ProfilePage.jsx";
+import BuyerOrders  from "./pages/BuyerOrders.jsx";
+import BuyerAccount from "./pages/BuyerAccount.jsx";
+import ProductDetails from "./pages/ProductDetails.jsx";
 import { Toaster } from 'react-hot-toast';
 
 function App() {
@@ -84,7 +87,18 @@ function MainContent({ userRole, handleLogout, setUserRole }) {
           path="/seller-profile"
           element={userRole === "seller" ? <ProfilePage /> : <Navigate to="/login" />}
         />
-
+        <Route
+          path="/orders"
+          element={userRole === "buyer" ? <BuyerOrders /> : <Navigate to="/login" />}
+        />
+        <Route
+          path="/account"
+          element={userRole === "buyer" ? <BuyerAccount /> : <Navigate to="/login" />}
+        />
+        <Route
+          path="/product/:id"
+          element={userRole === "buyer" ? <ProductDetails /> : <Navigate to="/login" />}
+        />
         {/* Add additional routes here -> */}
       </Routes>
     </>
