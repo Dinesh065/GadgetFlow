@@ -2,8 +2,11 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { FaHome, FaSearch, FaUser, FaShoppingCart, FaBell, FaShoppingBag, FaBars, FaTimes } from "react-icons/fa";
 import NotificationDropdown from "./NotificationDropdown";
+import {
+  LogOut,
+} from "lucide-react";
 
-const Navbar = () => {
+const Navbar = ({ onLogout }) => {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
@@ -21,21 +24,28 @@ const Navbar = () => {
 
       {/* Right Section - Account & Cart (Hidden on Mobile) */}
       <div className="hidden lg:flex items-center gap-8">
-          <Link to="/buyer-dashboard" className="flex items-center gap-2 text-gray-700 hover:text-black transition text-lg">
-            <FaHome className="text-xl" /> Browse Items
-          </Link>
-          <Link to="/orders" className="flex items-center gap-2 text-base text-gray-700 hover:text-black transition">
+        <Link to="/buyer-dashboard" className="flex items-center gap-2 text-gray-700 hover:text-black transition text-lg">
+          <FaHome className="text-xl" /> Browse Items
+        </Link>
+        <Link to="/orders" className="flex items-center gap-2 text-base text-gray-700 hover:text-black transition">
           <FaShoppingBag className="text-xl" /> Orders
-          </Link>
-          <Link to="/cart" className="flex items-center gap-2 text-gray-700 hover:text-black transition text-lg">
-            <FaShoppingCart className="text-xl" /> Cart
-          </Link>
+        </Link>
+        <Link to="/cart" className="flex items-center gap-2 text-gray-700 hover:text-black transition text-lg">
+          <FaShoppingCart className="text-xl" /> Cart
+        </Link>
         <div className="text-base text-gray-700 hover:text-black transition flex items-center gap-2">
-         <NotificationDropdown />
+          <NotificationDropdown />
         </div>
         <Link to="/account" className="flex items-center gap-2 text-gray-700 hover:text-black transition text-lg">
           <FaUser className="text-xl" /> Account
         </Link>
+        <button
+          onClick={onLogout}
+          className="border-2 border-black px-4 py-2 rounded-lg text-white hover:bg-white hover:text-orange-600 transition duration-300 flex items-center space-x-2"
+        >
+          <LogOut size={20} />
+          <span>Logout</span>
+        </button>
       </div>
 
       {/* Mobile Menu (Visible when isOpen is true) */}
