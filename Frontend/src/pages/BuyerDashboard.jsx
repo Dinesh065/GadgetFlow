@@ -1,9 +1,11 @@
 import { FaSlidersH, FaSearch } from "react-icons/fa";
-import ProductCard from "../components/ProductCard";
+// import ProductCard from "../components/ProductCard";
+import ProductCard from "../components/productCard.jsx";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import dayjs from "dayjs";
+import { API_BASE_URL } from "../config.jsx";
 
 const BuyerDashboard = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -23,12 +25,32 @@ const BuyerDashboard = () => {
   const remainingDays = dayjs(dueDate).diff(today, "day");
   const totalRentals = 12;
 
+  const [wishlistItems, setWishlistItems] = useState([]);
+
+  useEffect(() => {
+    const fetchWishlist = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        if (token) {
+          const res = await axios.get(`${API_BASE_URL}/buyers/wishlist`, {
+            headers: { Authorization: `Bearer ${token}` }
+          });
+          setWishlistItems(res.data.wishlist.map(entry => entry.itemId._id));
+        }
+      } catch (err) {
+        console.error("Failed to fetch wishlist", err);
+      }
+    };
+
+    fetchWishlist();
+  }, []);
+
   // Fetch products from backend
   useEffect(() => {
     const fetchProducts = async () => {
       try {
         setLoading(true);
-        const response = await axios.get("http://localhost:8000/api/v1/buyers/items", {
+        const response = await axios.get(`${API_BASE_URL}/buyers/items`, {
           params: {
             category: brandFilter,
             // minPrice: priceFilter === "low" ? 0 : priceFilter === "mid" ? 100 : undefined,
@@ -154,6 +176,8 @@ const BuyerDashboard = () => {
               name={product.name}
               price={`$${product.price}`}
               description={product.description}
+              rentalDuration={product.days_for_rent}
+              isWishlisted={wishlistItems.includes(product._id)}
             />
           ))}
         </div>

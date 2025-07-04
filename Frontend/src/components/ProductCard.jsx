@@ -1,27 +1,76 @@
 import { useNavigate } from "react-router-dom";
 import { FaHeart } from "react-icons/fa";
+import { useState, useEffect } from "react";
+import axios from "axios";
+import toast from "react-hot-toast";
+import { API_BASE_URL } from "../config";
 
-const ProductCard = (props) => {
-  const navigate = useNavigate();  
+const ProductCard = ({ id, images, name, price, description, isWishlisted: propWishlisted, rentalDuration }) => {
+  const navigate = useNavigate();
+  const [isWishlisted, setIsWishlisted] = useState(propWishlisted);
+
+  useEffect(() => {
+    setIsWishlisted(propWishlisted);
+  }, [propWishlisted]);
+
+  const handleWishlistClick = async (e) => {
+    e.stopPropagation(); // prevent card click
+
+    if (isWishlisted) return; // ✅ Do nothing if already wishlisted
+
+    try {
+      const token = localStorage.getItem("token");
+      await axios.post(
+        `${API_BASE_URL}/buyers/addToWishlist/${id}`,
+        {},
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+      toast.success("Added to wishlist");
+      setIsWishlisted(true);
+    } catch (err) {
+      if (err?.response?.data?.message?.toLowerCase().includes("already")) {
+        toast("Item already in wishlist", { icon: "⚠️" });
+        setIsWishlisted(true);
+      } else {
+        toast.error("Failed to add to wishlist");
+      }
+    }
+  };
+
   return (
-    <div className="rounded-md w-full relative hover:cursor-pointer shadow-md" onClick={() => navigate(`/product/${props.id}`)} >
-
-      <button className="absolute top-3 right-4 text-gray-400 hover:text-red-500">
+    <div className="rounded-md w-full relative shadow-md bg-white">
+      {/* Wishlist Button */}
+      <button
+        className={`absolute top-3 right-4 text-lg ${isWishlisted ? "text-red-500" : "text-gray-400 hover:text-red-500"}`}
+        onClick={handleWishlistClick}
+      >
         <FaHeart />
       </button>
 
+      {/* Image */}
       <img
-        src={props.images[0]}
-        alt={props.name}
+        src={images[0]}
+        alt={name}
         className="w-full h-40 object-cover mx-auto rounded-md"
       />
 
-      <h3 className="ml-4 mt-3 text-lg font-semibold text-gray-900">{props.name}</h3>
-      <p className="ml-4 text-gray-500 text-sm">{props.description}</p>
-      <div className="ml-4 text-green-600 text-sm mt-2">⭐⭐⭐⭐⭐ (121)</div>
-      <p className="ml-4 text-gray-900 font-bold text-lg mt-1">{props.price}</p>
+      {/* Info */}
+      <h3 className="ml-4 mt-3 text-lg font-semibold text-gray-900">{name}</h3>
+      <p className="ml-4 text-gray-500 text-sm">{description}</p>
 
-      <button className="ml-4 mt-3 mb-5 bg-green-600 text-white px-4 py-2 w-half rounded-full hover:bg-green-700 transition">
+      <p className="ml-4 text-blue-600 text-sm mt-1">
+        On rent for <span className="font-semibold">{rentalDuration}</span> days
+      </p>
+
+      <p className="ml-4 text-gray-900 font-bold text-lg mt-1">{price}</p>
+
+      {/* Only this button is clickable now */}
+      <button
+        onClick={() => navigate(`/product/${id}`)}
+        className="ml-4 mt-3 mb-5 bg-green-600 text-white px-4 py-2 w-half rounded-full hover:bg-green-700 transition"
+      >
         View Details
       </button>
     </div>

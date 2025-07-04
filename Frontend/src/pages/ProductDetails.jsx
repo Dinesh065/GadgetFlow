@@ -9,6 +9,7 @@ import {
   FaCheckCircle,
   FaMapMarkerAlt,
 } from "react-icons/fa";
+import { API_BASE_URL } from "../config";
 
 const ProductDetails = () => {
   const { id } = useParams(); // item ID from URL
@@ -16,17 +17,13 @@ const ProductDetails = () => {
   const [product, setProduct] = useState(null);
   const [selectedImage, setSelectedImage] = useState(null);
   const [hasRequested, setHasRequested] = useState(false);
+  const [isWishlisted, setIsWishlisted] = useState(false);
 
-  const hardcodedReviews = [
-    { user: "Alice", rating: 5, comment: "Amazing product and excellent condition!" },
-    { user: "Bob", rating: 4, comment: "Fast delivery and very helpful seller." },
-    { user: "Charlie", rating: 4, comment: "Worked like new. Will rent again!" },
-  ];
 
   useEffect(() => {
     const fetchProduct = async () => {
       try {
-        const res = await axios.get(`http://localhost:8000/api/v1/buyers/${id}`);
+        const res = await axios.get(`${API_BASE_URL}/buyers/${id}`);
         const item = res.data;
         setProduct(item);
         if (item.images?.length) setSelectedImage(item.images[0]);
@@ -58,7 +55,7 @@ const ProductDetails = () => {
     try {
       const token = localStorage.getItem("token");
       await axios.post(
-        `http://localhost:8000/api/v1/buyers/${id}/request`,
+        `${API_BASE_URL}/buyers/${id}/request`,
         { message: "Interested in renting this item!" },
         {
           headers: {
@@ -79,12 +76,11 @@ const ProductDetails = () => {
       }
     }
   };
-
   const handleAddWishlist = async () => {
     try {
       const token = localStorage.getItem("token");
-      await axios.post(
-        `http://localhost:8000/api/v1/buyers/addToWishlist/${id}`,
+      const res = await axios.post(
+        `${API_BASE_URL}/buyers/addToWishlist/${id}`,
         {},
         {
           headers: {
@@ -92,13 +88,18 @@ const ProductDetails = () => {
           },
         }
       );
-      toast.success("Item added to wishlist!");
+      toast.success(res.data?.message || "Item added to wishlist!");
     } catch (err) {
-      toast.error(
-        err?.response?.data?.message || "Could not add to wishlist."
-      );
+      const msg = err?.response?.data?.message?.toLowerCase();
+
+      if (msg?.includes("already in wishlist")) {
+        toast("Item already in your wishlist.", { icon: "⚠️" });
+      } else {
+        toast.error(err?.response?.data?.message || "Could not add to wishlist.");
+      }
     }
   };
+
 
   if (!product) return <p className="text-center mt-10">Loading product details...</p>;
 
@@ -153,6 +154,13 @@ const ProductDetails = () => {
           ₹{product.price} <span className="text-base text-gray-600">/day</span>
         </div>
 
+        {product.days_for_rent && (
+          <div className="text-xl font-medium text-green-700">
+            Total for {product.days_for_rent} day{product.days_for_rent > 1 ? "s" : ""}: ₹
+            {product.price * product.days_for_rent}
+          </div>
+        )}
+        
         <div className="flex gap-4 mt-6">
           <button
             className={`px-6 py-3 rounded-full text-white ${hasRequested ? "bg-gray-400 cursor-not-allowed" : "bg-green-600 hover:bg-green-700 transition"}`}
@@ -164,9 +172,15 @@ const ProductDetails = () => {
 
           <button
             onClick={handleAddWishlist}
-            className="border border-green-600 text-green-600 px-6 py-3 rounded-full hover:bg-green-600 hover:text-white transition">
-            Add to Wishlist
+            disabled={isWishlisted}
+            className={`border px-6 py-3 rounded-full transition ${isWishlisted
+              ? "border-gray-400 text-gray-400 cursor-not-allowed"
+              : "border-green-600 text-green-600 hover:bg-green-600 hover:text-white"
+              }`}
+          >
+            {isWishlisted ? "In Wishlist" : "Add to Wishlist"}
           </button>
+
         </div>
       </div>
 
@@ -218,19 +232,23 @@ const ProductDetails = () => {
       {/* Reviews */}
       <div className="mt-4 pt-4">
         <h3 className="text-lg font-semibold">Customer Reviews</h3>
-        {product.requests?.length ? (
-          product.requests.map((req, idx) => (
-            <div key={idx} className="border p-2 rounded-md mt-2">
-              <p>
-                <strong>{req.buyerId.fullName}</strong> ⭐ {req.rating || 'N/A'}/5
-              </p>
-              <p className="text-gray-600">{req.comment || req.message}</p>
-            </div>
-          ))
+
+        {product.requests?.some(req => req.rating && req.comment) ? (
+          product.requests
+            .filter(req => req.rating && req.comment)
+            .map((req, idx) => (
+              <div key={idx} className="border p-2 rounded-md mt-2">
+                <p>
+                  <strong>{req.buyerId.fullName}</strong> ⭐ {req.rating}/5
+                </p>
+                <p className="text-gray-600">{req.comment}</p>
+              </div>
+            ))
         ) : (
-          <p className="text-gray-500 mt-2">No reviews yet. Be the first to request!</p>
+          <p className="text-gray-500 mt-2">No reviews yet.</p>
         )}
       </div>
+
 
 
     </div>

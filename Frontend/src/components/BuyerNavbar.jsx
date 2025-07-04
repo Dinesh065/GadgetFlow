@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { FaHome, FaSearch, FaUser, FaShoppingCart, FaBell, FaShoppingBag, FaBars, FaTimes } from "react-icons/fa";
+import { FaHome, FaSearch, FaUser, FaHeart, FaBell, FaShoppingBag, FaBars, FaTimes } from "react-icons/fa";
 import NotificationDropdown from "./NotificationDropdown";
 import {
   LogOut,
@@ -30,8 +30,8 @@ const Navbar = ({ onLogout }) => {
         <Link to="/orders" className="flex items-center gap-2 text-base text-gray-700 hover:text-black transition">
           <FaShoppingBag className="text-xl" /> Orders
         </Link>
-        <Link to="/cart" className="flex items-center gap-2 text-gray-700 hover:text-black transition text-lg">
-          <FaShoppingCart className="text-xl" /> Cart
+        <Link to="/wishlist" className="flex items-center gap-2 text-gray-700 hover:text-black transition text-lg">
+          <FaHeart className="text-xl" /> Wishlist
         </Link>
         <div className="text-base text-gray-700 hover:text-black transition flex items-center gap-2">
           <NotificationDropdown />
@@ -57,8 +57,8 @@ const Navbar = ({ onLogout }) => {
           <Link to="/orders" className="text-gray-700 hover:text-black transition text-lg flex items-center gap-2">
             <FaShoppingBag className="text-xl" /> Orders
           </Link>
-          <Link to="/cart" className="text-gray-700 hover:text-black transition text-lg flex items-center gap-2">
-            <FaShoppingCart className="text-xl" /> Cart
+          <Link to="/wishlist" className="text-gray-700 hover:text-black transition text-lg flex items-center gap-2">
+            <FaHeart className="text-xl" /> Wishlist
           </Link>
           <div className="text-gray-700 hover:text-black transition text-lg flex items-center gap-2">
             <NotificationDropdown />

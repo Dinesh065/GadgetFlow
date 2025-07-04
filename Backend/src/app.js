@@ -7,6 +7,10 @@ import itemRoutes from "./routes/item.route.js";
 import overdueRoutes from "./routes/overdue.route.js";
 import rentalRoutes from "./routes/rental.route.js";
 import buyerRoutes from "./routes/buyer.routes.js";
+import wishlistRoutes from "./routes/wishlist.route.js";
+import paymentRoutes from "./routes/payment.route.js";
+import webhookRoutes from "./routes/webhook.route.js";
+import stripeConnectRoutes from "./routes/stripeConnect.route.js";
 // import noti from "./routes/notification.route.js";
 dotenv.config();
 
@@ -29,5 +33,9 @@ app.use("/api/v1/items",itemRoutes)
 app.use("/api/v1/item_overdues",overdueRoutes) 
 app.use("/api/v1/rentals",rentalRoutes) 
 app.use("/api/v1/buyers",buyerRoutes)
+app.use("/api/v1/wishlist",wishlistRoutes)
+app.use("/api/v1/payment", paymentRoutes);
+app.use("/api/v1/webhook", webhookRoutes);
+app.use("/api/v1/stripe", stripeConnectRoutes);
 // app.use("/api/v1/notifications",noti) 
 export { app }

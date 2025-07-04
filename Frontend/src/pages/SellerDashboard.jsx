@@ -29,14 +29,18 @@ import axios from "axios";
 import { API_BASE_URL } from "../config";
 import { FaTimes, FaChevronLeft, FaChevronRight } from "react-icons/fa";
 import BuyerRequestsModal from "../components/BuyerRequestModel";
+import { Navigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 const SellerDashboard = () => {
     const [profitData, setProfitData] = useState([]);
     const [filter, setFilter] = useState("All");
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedGadget, setSelectedGadget] = useState(null);
+    const [currentItemId, setCurrentItemId] = useState(null);
 
     const [items, setItems] = useState([]);
+    const navigate = useNavigate();
 
     useEffect(() => {
         const fetchProfitData = async () => {
@@ -67,7 +71,6 @@ const SellerDashboard = () => {
             if (!owner_id) return;
 
             const response = await axios.get(`${API_BASE_URL}/items/getItemsByOwner/${owner_id}`);
-
             if (Array.isArray(response.data)) {
                 setItems(response.data);
             } else if (Array.isArray(response.data?.items)) {
@@ -140,9 +143,8 @@ const SellerDashboard = () => {
     const fetchBuyerRequests = async (itemId) => {
         try {
             console.log("Fetching buyer requests for item ID:", itemId);
-            const res = await fetch(`http://localhost:8001/api/v1/items/requests/${itemId}`);
+            const res = await fetch(`${API_BASE_URL}/items/requests/${itemId}`);
             const data = await res.json();
-
             if (Array.isArray(data)) {
                 setBuyerRequests(data);
             } else {
@@ -152,6 +154,15 @@ const SellerDashboard = () => {
         } catch (err) {
             console.error("Failed to fetch buyer requests:", err);
             setBuyerRequests([]);
+        }
+    };
+
+    const handleAcceptRequest = async (acceptedRequestId, itemId) => {
+        try {
+            await axios.post(`${API_BASE_URL}/items/requests/accept/${acceptedRequestId}`);
+            fetchBuyerRequests(itemId); // ✅ now itemId is available
+        } catch (err) {
+            console.error("Error accepting request", err);
         }
     };
 
@@ -217,6 +228,12 @@ const SellerDashboard = () => {
                     <FaPlus />
                     Add New Item
                 </button>
+                <button
+                    className="bg-orange-500 text-white px-4 py-2 rounded"
+                    onClick={() => navigate("/setup-stripe")}
+                >
+                    Setup Stripe Account
+                </button>
             </div>
 
             {/* Item Cards */}
@@ -238,6 +255,7 @@ const SellerDashboard = () => {
                             <p className="text-gray-800 font-semibold">Requests: ₹{item.requests.length}</p>
                             <button
                                 onClick={() => {
+                                    setCurrentItemId(item._id); // ✅ Save it here
                                     setShowRequests(true);
                                     fetchBuyerRequests(item._id);
                                 }}
@@ -264,8 +282,10 @@ const SellerDashboard = () => {
             {selectedGadget && <DetailCard gadget={selectedGadget} onClose={() => setSelectedGadget(null)} />}
             {showRequests && (
                 <BuyerRequestsModal
+                    itemId={currentItemId}
                     requests={buyerRequests}
                     onClose={() => setShowRequests(false)}
+                    onAccept={handleAcceptRequest}
                 />
             )}
         </div>

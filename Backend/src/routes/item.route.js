@@ -219,22 +219,105 @@ router.post('/delete-multiple', verifyJWT, async (req, res) => {
     }
 });
 
-// routes/requests.js
 router.get('/requests/:itemId', async (req, res) => {
     try {
         const itemId = req.params.itemId;
 
-        const item = await Item.findById(itemId).populate('requests.buyerId', 'name image');
+        const item = await Item.findById(itemId)
+            .populate('requests.buyerId', 'fullName profileImage email contactNumber address pickupLocation');
 
         if (!item) {
             return res.status(404).json({ message: 'Item not found' });
         }
 
-        return res.status(200).json(item.requests); // send just the requests array
+        // ✅ Filter out requests where the buyer is the same as the owner
+        const filteredRequests = item.requests.filter(req =>
+            req.buyerId && req.buyerId._id.toString() !== item.ownerId.toString()
+        );
+
+        return res.status(200).json(filteredRequests);
     } catch (error) {
         console.error('Error fetching buyer requests:', error);
         return res.status(500).json({ message: 'Server error while fetching buyer requests' });
     }
 });
+
+router.post('/requests/accept/:requestId', async (req, res) => {
+    try {
+        const { requestId } = req.params;
+
+        // Find the item that contains this request
+        const item = await Item.findOne({ 'requests._id': requestId });
+
+        if (!item) return res.status(404).json({ message: 'Item not found' });
+
+        // Loop through and update all request statuses
+        item.requests = item.requests.map(req => {
+            if (req._id.toString() === requestId) {
+                req.status = 'Accepted';
+                req.acceptedAt = new Date(); // ✅ Set acceptedOn date here
+            } else {
+                req.status = 'Rejected';
+                req.acceptedAt = null; // Optional: clear acceptedOn if previously set
+            }
+            return req;
+        });
+
+        // Also update the item’s overall status and assign renter if needed
+        item.status = 'Accepted';
+        const acceptedReq = item.requests.find(r => r._id.toString() === requestId);
+        if (acceptedReq) {
+            item.renter = acceptedReq.buyerId;
+        }
+
+        await item.save();
+
+        res.status(200).json({ message: 'Request accepted and others rejected' });
+    } catch (error) {
+        console.error('Error accepting request:', error);
+        res.status(500).json({ message: 'Server error' });
+    }
+});
+
+router.get("/checkOutPage/:itemId", verifyJWT, async (req, res) => {
+    try {
+        const item = await Item.findById(req.params.itemId).lean();
+        if (!item) {
+            return res.status(404).json({ message: "Item not found" });
+        }
+
+        res.status(200).json(item);
+    } catch (error) {
+        console.error("Error fetching item:", error);
+        res.status(500).json({ message: "Server error" });
+    }
+});
+
+// In routes/item.js
+router.put("/mark-paid/:itemId", verifyJWT, async (req, res) => {
+    if (!req.user || !req.user._id) {
+        return res.status(401).json({ error: "Unauthorized access - user info missing." });
+    }
+
+    const item = await Item.findById(req.params.itemId);
+    if (!item) return res.status(404).json({ error: "Item not found" });
+
+    const buyerRequest = item.requests.find(
+        r => r.buyerId.toString() === req.user._id.toString() && r.status === "Accepted"
+    );
+
+    if (!buyerRequest) return res.status(400).json({ error: "No accepted request found." });
+
+    buyerRequest.paymentDone = true;
+    item.status = "Paid";
+    item.renter = req.user._id;
+    item.rentalDate = new Date();
+    item.dueDate = new Date(Date.now() + item.days_for_rent * 24 * 60 * 60 * 1000);
+
+    await item.save();
+    res.status(200).json({ message: "Payment marked successfully" });
+});
+
+
 
 export default router;

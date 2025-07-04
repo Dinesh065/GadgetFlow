@@ -144,6 +144,7 @@ const SellerNavbar = ({ onLogout }) => {
           <NavItem to="/seller-dashboard" icon={<Home size={20} />} text="Dashboard" currentPath={location.pathname} />
           <NavItem to="/manage-listings" icon={<List size={20} />} text="Manage Listings" currentPath={location.pathname} />
           <NavItem to="/rental-calendar" icon={<Calendar size={20} />} text="Rental Calendar" currentPath={location.pathname} />
+          <NavItem to="/earnings" icon={<Calendar size={20} />} text="My Earnings" currentPath={location.pathname} />
         </div>
 
         {/* Profile Dropdown */}
@@ -196,6 +197,7 @@ const SellerNavbar = ({ onLogout }) => {
           <NavItem to="/seller-dashboard" icon={<Home size={20} />} text="Dashboard" mobile />
           <NavItem to="/manage-listings" icon={<List size={20} />} text="Manage Listings" mobile />
           <NavItem to="/rental-calendar" icon={<Calendar size={20} />} text="Rental Calendar" mobile />
+          <NavItem to="/earnings" icon={<Calendar size={20} />} text="My Earnings" mobile />
           <Link to="/seller-profile" className="flex items-center space-x-2 text-white hover:text-gray-300">
             <UserCircle size={20} />
             <span>Profile</span>

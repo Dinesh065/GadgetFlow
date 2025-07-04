@@ -1,126 +1,179 @@
-import React from 'react';
+import React, { useEffect, useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
+import axios from "axios";
 import OrderSuccessPopup from "../components/OrderSuccessPopup";
-import { useState } from 'react';
+import { API_BASE_URL } from "../config";
+import toast from "react-hot-toast";
 
 const CheckoutPage = () => {
+  const location = useLocation();
+  const navigate = useNavigate();
+  const { state } = location;
+  const [item, setItem] = useState(null);
+  const [seller, setSeller] = useState(null);
+  const [deliveryType, setDeliveryType] = useState("pickup"); // default is pickup
   const [showPopup, setShowPopup] = useState(false);
+  // const { productId } = useParams();
 
-  const handlePayment = () => {
-    // Simulate payment process
-    setTimeout(() => {
-      setShowPopup(true);
-    }, 500);
+
+  useEffect(() => {
+    if (!state || !state.order) return navigate("/orders");
+
+    const fetchData = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        const itemRes = await axios.get(
+          `${API_BASE_URL}/items/checkOutPage/${state.order.productId}`,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
+
+        const item = itemRes.data;
+
+        const sellerRes = await axios.get(
+          `${API_BASE_URL}/users/checkOutPage/${item.ownerId}`,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
+
+        setItem(item);
+        setSeller(sellerRes.data);
+      } catch (error) {
+        console.error("Error fetching item/seller info", error);
+      }
+    };
+
+    fetchData();
+  }, [state, navigate]);
+
+  const handleStripePayment = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      const res = await axios.post(
+        `${API_BASE_URL}/payment/create-checkout-session/${item._id}`,
+        { deliveryType },
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+
+      if (res.data.url) {
+        window.location.href = res.data.url;
+      }
+    } catch (err) {
+      const msg = err.response?.data?.error || "Payment failed. Please try again.";
+      toast.error(msg); // show the specific message from backend (e.g. seller not onboarded)
+      console.error(err);
+      navigate(`/checkout/${item._id}`); // optional: redirect back to item or stay on page
+    }
   };
 
+  if (!item || !seller) {
+    return <div className="p-8 pt-24 text-gray-600">Loading...</div>;
+  }
+
+  const deliveryCost =
+    deliveryType === "delivery" && item.deliveryOptions.delivery
+      ? item.deliveryOptions.deliveryCost
+      : 0;
+
+  const days = item.days_for_rent || 1;
+  const subtotal = item.price * days;
+  const total = subtotal + deliveryCost;
+
   return (
-    <div className="p-8 min-h-screen">
-      {/* Breadcrumb */}
-      <p className="mt-20 text-gray-500 text-sm mb-4">Home / <span className="text-black font-medium">Checkout</span></p>
-
-      <div className="lg:mx-48 grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* Left Side - Review + Delivery */}
-        <div className="col-span-2 space-y-8">
-          {/* Review Item */}
-          <div className="border border-gray-200 bg-white p-6 rounded shadow-sm">
-            <h2 className="text-xl font-semibold mb-4">Review Item And Shipping</h2>
-            <div className="flex items-center gap-6">
-              <img src="https://store.storeimages.cdn-apple.com/4668/as-images.apple.com/is/airpods-max-select-pink-202011?wid=532&hei=582&fmt=png-alpha&.v=1604021221000" alt="AirPods Max" className="w-28 h-28" />
-              <div>
-                <h3 className="font-bold text-lg">Airpods- Max</h3>
-                <p>Color: Pink</p>
-              </div>
-              <div className="ml-auto text-right">
-                <p className="font-bold text-lg">$549.00</p>
-                <p>Quantity: 01</p>
-              </div>
-            </div>
-          </div>
-
-          {/* Returning Customer */}
-          <div className="flex items-center">
-            <input type="checkbox" className="mr-2" />
-            <label>Returning Customer?</label>
-          </div>
-
-          {/* Delivery Info */}
-          <div className="border border-gray-200 bg-white p-6 rounded shadow-sm">
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-xl font-semibold">Delivery Information</h2>
-              <button className="bg-gray-200 text-sm px-4 py-1 rounded">Save Information</button>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <input type="text" placeholder="First Name*" className="border p-2 rounded" />
-              <input type="text" placeholder="Last Name*" className="border p-2 rounded" />
-              <input type="text" placeholder="Address*" className="col-span-2 border p-2 rounded" />
-              <input type="text" placeholder="City/ Town*" className="border p-2 rounded" />
-              <input type="text" placeholder="Zip Code*" className="border p-2 rounded" />
-              <input type="text" placeholder="Mobile*" className="border p-2 rounded" />
-              <input type="email" placeholder="Email*" className="border p-2 rounded" />
-            </div>
-          </div>
-        </div>
-
-        {/* Right Side - Order Summary */}
+    <div className="p-8 pt-24 min-h-screen max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-8">
+      {/* Left - Item and Seller Info */}
+      <div className="col-span-2 space-y-8">
+        {/* Item Box */}
         <div className="border border-gray-200 bg-white p-6 rounded shadow-sm">
-          <h2 className="text-xl font-semibold mb-4">Order Summary</h2>
-
-          {/* Coupon */}
-          <div className="relative flex mb-6">
-            <input
-              type="text"
-              placeholder="Enter Coupon Code"
-              className="border p-2 rounded-full w-full"
+          <h2 className="text-xl font-semibold mb-4">Item Details</h2>
+          <div className="flex items-center gap-6">
+            <img
+              src={item.images[0]}
+              alt={item.name}
+              className="w-32 h-32 object-cover rounded"
             />
-            <button className="h-full absolute right-0 bg-green-600 text-white px-4 rounded-full">Apply coupon</button>
-          </div>
-
-          {/* Payment Options */}
-          <div className="mb-4">
-            <h3 className="font-semibold mb-2">Payment Details</h3>
-            <div className="space-y-2">
-              <label className="block"><input type="radio" name="payment" /> Cash on Delivery</label>
-              <label className="block"><input type="radio" name="payment" /> Shopcart Card</label>
-              <label className="block"><input type="radio" name="payment" /> Paypal</label>
-              <label className="block">
-                <input type="radio" name="payment" defaultChecked /> Credit or Debit card
-              </label>
+            <div>
+              <h3 className="font-bold text-lg">{item.name}</h3>
+              <p className="text-sm text-gray-600">Category: {item.category}</p>
+              <p className="text-sm text-gray-600">Price/Day: ₹{item.price}</p>
+              <p className="text-sm mt-2 text-gray-700">{item.description}</p>
             </div>
-          </div>
-
-          {/* Card Info */}
-          <div className="h-fit space-y-4">
-            {/* Cost Breakdown */}
-            <div className="border-t mt-6 pt-4 space-y-2 text-sm text-gray-700">
-              <div className="flex justify-between">
-                <span>Sub Total</span>
-                <span>$549.00</span>
-              </div>
-              <div className="flex justify-between">
-                <span>Tax(10%)</span>
-                <span>$54.90</span>
-              </div>
-              <div className="flex justify-between text-gray-500">
-                <span>Shipping Cost</span>
-                <span>-$0.00</span>
-              </div>
-
-              <hr className="my-2" />
-
-              <div className="flex justify-between font-semibold text-black text-base">
-                <span>Total</span>
-                <span>= $494.10</span>
-              </div>
-            </div>
-
-            {/* Pay Button */}
-            <button className="mt-4 w-full bg-green-600 hover:bg-green-700 text-white py-3 rounded-full font-semibold text-sm" onClick={handlePayment}>
-              Pay $494.10
-            </button>
-
-            <OrderSuccessPopup isOpen={showPopup} onClose={() => setShowPopup(false)} />
-
           </div>
         </div>
+
+        {/* Seller Box */}
+        <div className="border border-gray-200 bg-white p-6 rounded shadow-sm">
+          <h2 className="text-xl font-semibold mb-4">Seller Info</h2>
+          <div className="flex items-center gap-4">
+            <img
+              src={seller.profileImage || "https://via.placeholder.com/80"}
+              alt="Seller"
+              className="w-20 h-20 object-cover rounded-full"
+            />
+            <div>
+              <p className="font-semibold text-lg">{seller.fullName}</p>
+              <p className="text-sm text-gray-600">
+                Location: {seller.address || "N/A"}
+              </p>
+              <p className="text-sm text-gray-600">
+                Contact: {seller.contactNumber || "N/A"}
+              </p>
+              <p className="text-sm text-gray-600">Rating: N/A</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Right - Payment Summary */}
+      <div className="border border-gray-200 bg-white p-6 rounded shadow-sm h-fit">
+        <h2 className="text-xl font-semibold mb-4">Order Summary</h2>
+
+        {/* Delivery Option */}
+        {item.deliveryOptions.delivery ? (
+          <div className="mb-4">
+            <label className="block font-medium mb-1">Select Delivery Option:</label>
+            <select
+              value={deliveryType}
+              onChange={(e) => setDeliveryType(e.target.value)}
+              className="border px-3 py-2 rounded w-full"
+            >
+              <option value="pickup">Pickup (Free)</option>
+              <option value="delivery">Delivery (+₹{item.deliveryOptions.deliveryCost})</option>
+            </select>
+          </div>
+        ) : (
+          <p className="mb-4 text-sm text-gray-600 font-medium">Only Pickup is available.</p>
+        )}
+
+        {/* Price Summary */}
+        <div className="space-y-2 text-sm text-gray-700">
+          <div className="flex justify-between">
+            <span>Item Price (₹{item.price} × {days} day{days > 1 ? "s" : ""})</span>
+            <span>₹{subtotal}</span>
+          </div>
+          <div className="flex justify-between">
+            <span>Delivery</span>
+            <span>{deliveryType === "delivery" ? `₹${deliveryCost}` : "Pickup (Free)"}</span>
+          </div>
+          <hr className="my-2" />
+          <div className="flex justify-between font-semibold text-black text-base">
+            <span>Total</span>
+            <span>₹{total}</span>
+          </div>
+        </div>
+
+        <button
+          className="bg-green-600 text-white px-6 py-3 rounded-full hover:bg-green-700 transition text-sm mt-4"
+          onClick={handleStripePayment}
+        >
+          Pay with Stripe
+        </button>
+
+        <OrderSuccessPopup isOpen={showPopup} onClose={() => setShowPopup(false)} />
       </div>
     </div>
   );

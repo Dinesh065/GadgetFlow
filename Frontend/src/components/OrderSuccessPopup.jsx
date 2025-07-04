@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import Lottie from 'lottie-react';
+// import Lottie from 'lottie-react';
 import successAnimation from "../assets/success.json";
 
 const OrderSuccessPopup = ({ isOpen, onClose }) => {
@@ -20,7 +20,7 @@ const OrderSuccessPopup = ({ isOpen, onClose }) => {
             exit={{ scale: 0.8, opacity: 0 }}
             transition={{ duration: 0.5, ease: "easeOut" }}
           >
-             <Lottie animationData={successAnimation} loop={false} />
+             {/* <Lottie animationData={successAnimation} loop={false} /> */}
 
             <h2 className="text-xl font-semibold mb-2">Your order has been accepted</h2>
             <p className="text-sm text-gray-600 mb-6">Transaction ID: 8984294820</p>

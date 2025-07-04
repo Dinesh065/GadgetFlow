@@ -5,7 +5,7 @@ import { verifyJWT } from "../middlewares/auth.middleware.js";
 import { User } from "../models/user.model.js";
 import { Review } from "../models/review.model.js";
 import { Wishlist } from "../models/wishlist.model.js";
-
+import dayjs from "dayjs";
 const router = Router();
 
 // Get All Available Items with Optional Filters
@@ -40,6 +40,117 @@ router.get("/items", async (req, res) => {
   }
 });
 
+// GET: Get user's wishlist
+router.get('/wishlist', verifyJWT, async (req, res) => {
+  const userId = req.user.id;
+
+  try {
+    const wishlist = await Wishlist.find({ userId }).populate('itemId');
+    res.status(200).json({ wishlist });
+  } catch (err) {
+    console.error("Fetch wishlist error:", err);
+    res.status(500).json({ message: "Server error fetching wishlist" });
+  }
+});
+
+
+router.get('/orders', verifyJWT, async (req, res) => {
+  const userId = req.user.id;
+
+  try {
+    const items = await Item.find({
+      'requests.buyerId': userId
+    }).lean();
+
+    const requested = [], accepted = [], rejected = [];
+
+    items.forEach(item => {
+      item.requests.forEach(reqEntry => {
+        if (String(reqEntry.buyerId) !== userId) return;
+
+        const base = {
+          productId: item._id,
+          name: item.name,
+          category: item.category,
+          price: item.price,
+        };
+
+        if (reqEntry.status === 'Requested') {
+          requested.push({
+            ...base,
+            requestedOn: reqEntry.requestedAt,
+            orderId: `${item._id}-${reqEntry._id}`
+          });
+        }
+        else if (reqEntry.status === 'Accepted') {
+          const acceptedAt = reqEntry.acceptedAt;
+          const paymentDone = reqEntry.paymentDone || false;
+          const dueDate = paymentDone ? item.dueDate : null;
+
+          accepted.push({
+            ...base,
+            acceptedAt,   // ✅ Now your frontend will get the real acceptance time
+            dueDate,
+            paymentDone: reqEntry.paymentDone || false,
+            orderId: `${item._id}-${reqEntry._id}`
+          });
+        }
+        else if (reqEntry.status === 'Rejected') {
+          rejected.push({
+            ...base,
+            rejectedOn: reqEntry.requestedAt,
+            reason: 'Request denied',
+            orderId: `${item._id}-${reqEntry._id}`
+          });
+        }
+      });
+    });
+
+    res.status(200).json({ requested, accepted, rejected });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Server error fetching orders' });
+  }
+});
+
+router.get("/accepted-orders", verifyJWT, async (req, res) => {
+  try {
+    const buyerId = req.user._id;
+
+    // Fetch only items that have requests made by this buyer
+    const items = await Item.find({
+      "requests.buyerId": buyerId
+    });
+
+    const acceptedOrders = [];
+
+    items.forEach(item => {
+      item.requests.forEach(req => {
+        if (
+          req.buyerId.toString() === buyerId.toString() &&
+          req.status === "Accepted" &&
+          !req.paymentDone &&
+          dayjs().diff(dayjs(req.acceptedAt), "hour") < 24
+        ) {
+          acceptedOrders.push({
+            _id: req._id,
+            name: item.name,
+            productId: item._id,
+            acceptedAt: req.acceptedAt,
+            paymentDone: req.paymentDone || false
+          });
+        }
+      });
+    });
+
+    res.status(200).json(acceptedOrders);
+  } catch (err) {
+    console.error("Error in /buyers/accepted-orders:", err);
+    res.status(500).json({ error: "Server error while fetching accepted orders." });
+  }
+});
+
+
 // Send Rental Request for an Item
 router.post('/:itemId/request', verifyJWT, async (req, res) => {
   const buyerId = req.user.id;
@@ -63,7 +174,8 @@ router.post('/:itemId/request', verifyJWT, async (req, res) => {
     item.requests.push({
       buyerId,
       message: message || "Interested in renting",
-      requestedAt: new Date()
+      requestedAt: new Date(),
+      status: "Requested",
     });
 
     await item.save();

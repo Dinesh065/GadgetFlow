@@ -11,9 +11,17 @@ import OrderListing from "./components/OrderListing.jsx";
 import FloatingIcons from "./components/FloatingIcons.jsx";
 import RentalCalendar from "./pages/RentalCalendar.jsx";
 import ProfilePage from "./pages/ProfilePage.jsx";
-import BuyerOrders  from "./pages/BuyerOrders.jsx";
+import BuyerOrders from "./pages/BuyerOrders.jsx";
 import BuyerAccount from "./pages/BuyerAccount.jsx";
 import ProductDetails from "./pages/ProductDetails.jsx";
+import BuyerProfilePage from "./components/BuyerProfilePage.jsx";
+import CheckoutPage from "./pages/CheckoutPage.jsx";
+import WishlistPage from "./components/Wishlist.jsx";
+import PaymentSuccess from "./components/PaymentSuccess.jsx";
+import OnboardStripe from "./components/OnboardStripe.jsx";
+import StripeSetupNotice from "./components/StripeSetupNotice.jsx";
+import SetupStripe from "./components/SetupStripe.jsx";
+import EarningsPage from "./components/EarningsPage.jsx";
 import { Toaster } from 'react-hot-toast';
 
 function App() {
@@ -96,9 +104,42 @@ function MainContent({ userRole, handleLogout, setUserRole }) {
           element={userRole === "buyer" ? <BuyerAccount /> : <Navigate to="/login" />}
         />
         <Route
+          path="/account/buyer-profile"
+          element={userRole === "buyer" ? <BuyerProfilePage /> : <Navigate to="/login" />}
+        />
+        <Route
           path="/product/:id"
           element={userRole === "buyer" ? <ProductDetails /> : <Navigate to="/login" />}
         />
+        <Route
+          path="/checkout/:productId"
+          element={userRole === "buyer" ? <CheckoutPage /> : <Navigate to="/login" />}
+        />
+        <Route
+          path="/wishlist"
+          element={userRole === "buyer" ? <WishlistPage /> : <Navigate to="/login" />}
+        />
+        <Route
+          path="/payment-success/:itemId"
+          element={userRole === "buyer" ? <PaymentSuccess /> : <Navigate to="/login" />}
+        />
+        <Route
+          path="/onboard-stripe"
+          element={userRole === "seller" ? <OnboardStripe /> : <Navigate to="/login" />}
+        />
+        <Route
+          path="/setup-stripe"
+          element={userRole === "seller" ? <SetupStripe /> : <Navigate to="/login" />}
+        />
+        <Route
+          path="/earnings"
+          element={userRole === "seller" ? <EarningsPage /> : <Navigate to="/login" />}
+        />
+        {/* <Route
+          path="/setup-stripe"
+          element={userRole === "seller" ? <StripeSetupNotice /> : <Navigate to="/login" />}
+        /> */}
+
         {/* Add additional routes here -> */}
       </Routes>
     </>

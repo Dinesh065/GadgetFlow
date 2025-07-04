@@ -1,7 +1,7 @@
 import { FaUser, FaShoppingBag, FaHeart, FaBell, FaCreditCard, FaQuestionCircle, FaBars, FaTimes, FaTrash } from "react-icons/fa";
 import { useLocation } from "react-router-dom";
 import { useEffect, useState } from "react";
-
+import BuyerProfilePage from "../components/BuyerProfilePage";
 
 const BuyerAccount = () => {
   const [activeSection, setActiveSection] = useState("profile");
@@ -45,9 +45,8 @@ const BuyerAccount = () => {
           {menuItems.map((item) => (
             <button
               key={item.id}
-              className={`flex items-center w-full px-4 py-3 text-left rounded-lg text-gray-700 transition ${
-                activeSection === item.id ? "bg-gray-200 font-semibold" : "hover:bg-gray-100"
-              }`}
+              className={`flex items-center w-full px-4 py-3 text-left rounded-lg text-gray-700 transition ${activeSection === item.id ? "bg-gray-200 font-semibold" : "hover:bg-gray-100"
+                }`}
               onClick={() => {
                 setActiveSection(item.id);
                 setIsSidebarOpen(false);
@@ -67,39 +66,7 @@ const BuyerAccount = () => {
           <FaBars />
         </button>
 
-        {activeSection === "profile" && (
-          <section>
-            <h2 className="text-xl font-semibold text-gray-800 mb-4">Profile & Settings</h2>
-            <div className="space-y-4">
-              <label className="block">
-                <span className="text-gray-600">Name</span>
-                <input type="text" name="name" value={profile.name} onChange={handleProfileChange} className="w-full border p-2 rounded-md mt-1" />
-              </label>
-              <label className="block">
-                <span className="text-gray-600">Email</span>
-                <input type="email" name="email" value={profile.email} className="w-full border p-2 rounded-md mt-1" disabled />
-              </label>
-              <label className="block">
-                <span className="text-gray-600">Phone</span>
-                <input type="text" name="phone" value={profile.phone} onChange={handleProfileChange} className="w-full border p-2 rounded-md mt-1" />
-              </label>
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-xl font-semibold">Delivery Information</h2>
-              <button className="bg-gray-200 text-sm px-4 py-1 rounded">Save Information</button>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <input type="text" placeholder="First Name*" className="border p-2 rounded" />
-              <input type="text" placeholder="Last Name*" className="border p-2 rounded" />
-              <input type="text" placeholder="Address*" className="col-span-2 border p-2 rounded" />
-              <input type="text" placeholder="City/ Town*" className="border p-2 rounded" />
-              <input type="text" placeholder="Zip Code*" className="border p-2 rounded" />
-              <input type="text" placeholder="Mobile*" className="border p-2 rounded" />
-              <input type="email" placeholder="Email*" className="border p-2 rounded" />
-            </div>
-              <button className="mt-3 bg-green-600 text-white px-4 py-2 rounded-full">Save Changes</button>
-            </div>
-          </section>
-        )}
+        {activeSection === "profile" && <BuyerProfilePage />}
 
         {activeSection === "wishlist" && (
           <section id="wishlist">
