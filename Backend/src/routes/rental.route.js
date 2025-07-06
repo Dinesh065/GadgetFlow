@@ -20,7 +20,7 @@ router.get("/fetchCalendarData", async (req, res) => {
         if (!includePast) {
             matchQuery.$expr = {
                 $gte: [
-                    { $add: ["$rentalDate", { $multiply: ["$daysForRent", 86400000] }] },
+                    { $add: ["$rentalDate", { $multiply: ["$days_for_rent", 86400000] }] },
                     today
                 ]
             };
@@ -32,7 +32,7 @@ router.get("/fetchCalendarData", async (req, res) => {
         const data = items.map(item => {
             const rented_start = item.rentalDate;
             const rented_end = new Date(item.rentalDate);
-            rented_end.setDate(rented_end.getDate() + item.daysForRent);
+            rented_end.setDate(rented_end.getDate() + item.days_for_rent);
 
             return {
                 name: item.name,

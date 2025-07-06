@@ -12,10 +12,10 @@ const BuyerOrders = () => {
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
   const today = dayjs();
-  const [showReminder, setShowReminder] = useState(false);
-  const [reminderOrder, setReminderOrder] = useState(null);
+  const [visibleTrackCard, setVisibleTrackCard] = useState(null);
+  const [showConfirmDialog, setShowConfirmDialog] = useState(false);
+  const [confirmingOrder, setConfirmingOrder] = useState(null);
 
-  // fetch orders
   useEffect(() => {
     const fetchOrders = async () => {
       try {
@@ -25,23 +25,6 @@ const BuyerOrders = () => {
           headers: { Authorization: `Bearer ${token}` },
         });
         setOrders(res.data);
-
-        // ✅ Show payment reminder modal for first unpaid accepted order
-        const firstUnpaid = res.data.accepted.find(order => {
-          const acceptedAt = dayjs(order.acceptedAt);
-          const now = dayjs();
-          return (
-            acceptedAt.isValid() &&
-            now.diff(acceptedAt, 'hour') < 24 &&
-            !order.paymentDone // 🔁 This field should exist in backend schema
-          );
-        });
-
-        if (firstUnpaid) {
-          setReminderOrder(firstUnpaid);
-          setShowReminder(true);
-        }
-
       } catch (err) {
         console.error(err);
         toast.error("Failed to load orders.");
@@ -51,6 +34,49 @@ const BuyerOrders = () => {
     };
     fetchOrders();
   }, []);
+
+  const confirmDelivery = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      const res = await axios.post(`${API_BASE_URL}/buyers/confirm-delivery`, {
+        productId: confirmingOrder.productId,
+      }, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      toast.success("Confirmation successful. Email sent!");
+      setShowConfirmDialog(false);
+      setVisibleTrackCard(null);
+      setConfirmingOrder(null);
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to confirm.");
+    }
+  };
+
+  const renderTrackCard = (order) => {
+    const deliveryMethod = order.deliveryType || order.delivery_type || order.delivery || "pickup";
+    const label = deliveryMethod === "delivery" ? "Delivery" : "Pickup";
+    const message =
+      deliveryMethod === "delivery"
+        ? "Your item will be delivered within 24 hours. Once received, please confirm."
+        : "Please collect the item within 24 hours and then confirm.";
+
+    return (
+      <div className="bg-gray-100 rounded p-4 mt-2 w-full">
+        <p className="text-sm mb-2">{message}</p>
+        <button
+          onClick={() => {
+            setConfirmingOrder(order);
+            setShowConfirmDialog(true);
+          }}
+          className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
+        >
+          Confirm {label}
+        </button>
+      </div>
+    );
+  };
 
   const renderCard = (order, type) => {
     const daysRemaining = type === "accepted" && order.dueDate
@@ -62,7 +88,7 @@ const BuyerOrders = () => {
         key={order.orderId}
         className="bg-white rounded-lg shadow-md p-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 hover:shadow-lg transition"
       >
-        <div>
+        <div className="flex-1 w-full">
           <h3 className="text-lg font-semibold">{order.name}</h3>
           <p className="text-gray-600">Category: {order.category}</p>
           <p className="text-gray-600">Price/Day: ${order.price}</p>
@@ -102,9 +128,11 @@ const BuyerOrders = () => {
               </p>
             </>
           )}
+
+          {visibleTrackCard === order.orderId && renderTrackCard(order)}
         </div>
 
-        <div className="flex gap-2 mt-2 sm:mt-0">
+        <div className="flex flex-col gap-2 mt-2 sm:mt-0">
           <button
             onClick={() => navigate(`/product/${order.productId}`)}
             className="border border-green-600 text-green-600 px-6 py-3 rounded-full hover:bg-green-600 hover:text-white transition text-sm"
@@ -122,30 +150,33 @@ const BuyerOrders = () => {
           )}
 
           {type === "accepted" && order.paymentDone && (
-            <button
-              onClick={() => navigate(`/rental-status/${order.productId}`)}
-              className="bg-blue-600 text-white px-6 py-3 rounded-full hover:bg-blue-700 transition text-sm"
-            >
-              Track Rental
-            </button>
+            order.requests?.[0]?.buyerConfirmed && order.requests?.[0]?.sellerAcknowledged ? (
+              <button
+                onClick={() => navigate("/my-rentals")}
+                className="bg-green-600 text-white px-6 py-3 rounded-full hover:bg-green-700 transition text-sm"
+              >
+                Go to My Rentals
+              </button>
+            ) : (
+              <button
+                onClick={() =>
+                  setVisibleTrackCard(visibleTrackCard === order.orderId ? null : order.orderId)
+                }
+                className="bg-blue-600 text-white px-6 py-3 rounded-full hover:bg-blue-700 transition text-sm"
+              >
+                Track Rental
+              </button>
+            )
           )}
         </div>
       </div>
     );
+
   };
 
   return (
     <div className="max-w-5xl mx-auto pt-20 px-4">
       <h1 className="text-2xl font-bold mb-4">My Orders</h1>
-      {
-        showReminder && reminderOrder && (
-          <PaymentReminderModal
-            order={reminderOrder}
-            onClose={() => setShowReminder(false)}
-            onPay={() => navigate(`/checkout/${reminderOrder.productId}`)}
-          />
-        )
-      }
 
       <div className="flex gap-4 mb-6 border-b border-gray-300 pb-2">
         {["requested", "accepted", "rejected"].map(tab => (
@@ -161,6 +192,32 @@ const BuyerOrders = () => {
       </div>
 
       <div className="space-y-4">
+        {
+          showConfirmDialog && confirmingOrder && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
+              <div className="bg-white rounded-lg p-6 shadow-md max-w-sm w-full">
+                <h2 className="text-lg font-semibold mb-2">Are you sure?</h2>
+                <p className="text-sm mb-4">
+                  This action will confirm that you've {confirmingOrder.deliveryType === "delivery" ? "received" : "picked up"} the item. This cannot be undone.
+                </p>
+                <div className="flex justify-end gap-3">
+                  <button
+                    onClick={() => setShowConfirmDialog(false)}
+                    className="px-4 py-2 rounded bg-gray-300 hover:bg-gray-400"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={confirmDelivery}
+                    className="px-4 py-2 rounded bg-green-600 text-white hover:bg-green-700"
+                  >
+                    Yes, Confirm
+                  </button>
+                </div>
+              </div>
+            </div>
+          )
+        }
         {loading ? (
           <p>Loading orders...</p>
         ) : orders[activeTab]?.length ? (
@@ -170,6 +227,7 @@ const BuyerOrders = () => {
         )}
       </div>
     </div>
+
   );
 };
 

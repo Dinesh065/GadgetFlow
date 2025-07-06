@@ -1,28 +1,82 @@
-import { useState } from "react";
-import { Link } from "react-router-dom";
-import { FaHome, FaSearch, FaUser, FaHeart, FaBell, FaShoppingBag, FaBars, FaTimes } from "react-icons/fa";
-import NotificationDropdown from "./NotificationDropdown";
+import { useState, useEffect, useRef } from "react";
+import { Link, useLocation } from "react-router-dom";
 import {
-  LogOut,
-} from "lucide-react";
+  FaHome,
+  FaHeart,
+  FaShoppingBag,
+  FaBars,
+  FaTimes,
+  FaBoxOpen,
+  FaMoneyBillWave
+} from "react-icons/fa";
+import { LogOut, ChevronDown } from "lucide-react";
+import axios from "axios";
+import { API_BASE_URL } from "../config";
+
+const DEFAULT_PROFILE_IMAGE = "https://img.freepik.com/free-vector/blue-circle-with-white-user_78370-4707.jpg";
 
 const Navbar = ({ onLogout }) => {
   const [isOpen, setIsOpen] = useState(false);
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [user, setUser] = useState(null);
+  const dropdownRef = useRef(null);
+  const location = useLocation();
+  const [scrolled, setScrolled] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 10);
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      const token = localStorage.getItem("token");
+      if (!token) return;
+
+      try {
+        const res = await axios.get(`${API_BASE_URL}/users/fetchProfileData`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        setUser(res.data);
+      } catch (err) {
+        console.error("Error fetching user data:", err);
+      }
+    };
+
+    fetchUser();
+  }, []);
+
+  useEffect(() => {
+    const handleOutsideClick = (e) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
+        setDropdownOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleOutsideClick);
+    return () => document.removeEventListener("mousedown", handleOutsideClick);
+  }, []);
+
+  const toggleDropdown = () => setDropdownOpen((prev) => !prev);
 
   return (
-    <nav className="bg-white fixed top-0 left-0 h-20 px-6 lg:px-12 flex items-center justify-between z-50 w-full">
-
-      {/* Left Section - Logo & Toggle Button */}
+    <nav
+      className={`fixed top-0 left-0 h-20 px-6 lg:px-12 flex items-center justify-between z-50 w-full transition-all duration-300 ${scrolled ? "bg-white/50 backdrop-blur-md shadow-md" : "bg-white shadow"
+        }`}
+    >
+      {/* Left: Logo */}
       <div className="flex items-center gap-12">
-        <button onClick={() => setIsOpen(!isOpen)} className="lg:hidden text-2xl text-gray-700">
-          {isOpen ? <FaTimes /> : <FaBars />}
-        </button>
-        <Link to="/buyer-dashboard" className="text-green-700 font-bold text-2xl flex items-center">
-          <span className="mr-2 text-3xl">🛒</span> GadgetFlow
-        </Link>
+
+        <div className="flex items-center space-x-2">
+          <img src="/images/Logo.png" alt="GadgetFlow Logo" className="h-10 w-auto" />
+          <h1 className="text-green-500 text-2xl font-bold">GadgetFlow</h1>
+        </div>
       </div>
 
-      {/* Right Section - Account & Cart (Hidden on Mobile) */}
+      {/* Right: Links & Profile */}
       <div className="hidden lg:flex items-center gap-8">
         <Link to="/buyer-dashboard" className="flex items-center gap-2 text-gray-700 hover:text-black transition text-lg">
           <FaHome className="text-xl" /> Browse Items
@@ -33,22 +87,49 @@ const Navbar = ({ onLogout }) => {
         <Link to="/wishlist" className="flex items-center gap-2 text-gray-700 hover:text-black transition text-lg">
           <FaHeart className="text-xl" /> Wishlist
         </Link>
-        <div className="text-base text-gray-700 hover:text-black transition flex items-center gap-2">
-          <NotificationDropdown />
-        </div>
-        <Link to="/account" className="flex items-center gap-2 text-gray-700 hover:text-black transition text-lg">
-          <FaUser className="text-xl" /> Account
+        <Link to="/my-rentals" className="flex items-center gap-2 text-gray-700 hover:text-black transition text-lg">
+          <FaBoxOpen className="text-xl" /> My Rentals
         </Link>
-        <button
-          onClick={onLogout}
-          className="border-2 border-black px-4 py-2 rounded-lg text-white hover:bg-white hover:text-orange-600 transition duration-300 flex items-center space-x-2"
-        >
-          <LogOut size={20} />
-          <span>Logout</span>
+        <Link to="/payment-history" className="flex items-center gap-2 text-gray-700 hover:text-black transition text-lg">
+          <FaMoneyBillWave className="text-xl" /> Payment History
+        </Link>
+
+        {/* Profile Dropdown */}
+        <div className="relative flex flex-col items-end" ref={dropdownRef}>
+          <div onClick={toggleDropdown} className="flex items-center space-x-2 cursor-pointer">
+            <img
+              src={user?.profileImage || DEFAULT_PROFILE_IMAGE}
+              alt="profile"
+              className="h-8 w-8 rounded-full object-cover"
+            />
+            <span className="text-sm text-gray-700 font-medium">{user?.fullName || "User"}</span>
+            <ChevronDown size={16} color="gray" />
+          </div>
+
+          {dropdownOpen && (
+            <div className="absolute right-0 mt-2 w-40 bg-white rounded-md shadow-lg z-10">
+              <Link to="/buyer-account" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                Profile
+              </Link>
+              <button
+                onClick={onLogout}
+                className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100"
+              >
+                Logout
+              </button>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Mobile Menu Icon */}
+      <div className="lg:hidden ml-auto">
+        <button onClick={() => setIsOpen(!isOpen)} className="text-2xl text-gray-700">
+          {isOpen ? <FaTimes /> : <FaBars />}
         </button>
       </div>
 
-      {/* Mobile Menu (Visible when isOpen is true) */}
+      {/* Mobile Nav */}
       <div className={`lg:hidden fixed top-20 left-0 w-full bg-white shadow-md transition-transform transform ${isOpen ? "translate-x-0" : "-translate-x-full"} p-6`}>
         <div className="flex flex-col gap-4">
           <Link to="/" className="text-gray-700 hover:text-black transition text-lg flex items-center gap-2">
@@ -60,15 +141,14 @@ const Navbar = ({ onLogout }) => {
           <Link to="/wishlist" className="text-gray-700 hover:text-black transition text-lg flex items-center gap-2">
             <FaHeart className="text-xl" /> Wishlist
           </Link>
-          <div className="text-gray-700 hover:text-black transition text-lg flex items-center gap-2">
-            <NotificationDropdown />
-          </div>
-          <Link to="/account" className="text-gray-700 hover:text-black transition text-lg flex items-center gap-2">
-            <FaUser className="text-xl" /> Account
+          <Link to="/my-rentals" className="text-gray-700 hover:text-black transition text-lg flex items-center gap-2">
+            <FaBoxOpen className="text-xl" /> My Rentals
+          </Link>
+          <Link to="/payment-history" className="text-gray-700 hover:text-black transition text-lg flex items-center gap-2">
+            <FaMoneyBillWave className="text-xl" /> Payment History
           </Link>
         </div>
       </div>
-
     </nav>
   );
 };

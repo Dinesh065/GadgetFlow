@@ -100,105 +100,107 @@ export default function RentalCalendar() {
     };
 
     return (
-        <div className="p-6 relative">
-            <h2 className="text-2xl font-bold mb-4">Rental Calendar</h2>
+        <div className="bg-gray-50 pt-20">
+            <div className="p-6 relative">
+                <h2 className="text-2xl font-bold mb-4">Rental Calendar</h2>
 
-            {/* Right Side Overdue Button */}
-            <div className="absolute top-6 right-6">
-                <button
-                    className="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded"
-                    onClick={() => setShowOverdueDialog(true)}
-                >
-                    Overdues ({alerts.length})
-                </button>
-            </div>
+                {/* Right Side Overdue Button */}
+                <div className="absolute top-6 right-6">
+                    <button
+                        className="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded"
+                        onClick={() => setShowOverdueDialog(true)}
+                    >
+                        Overdues ({alerts.length})
+                    </button>
+                </div>
 
-            {/* Filters */}
-            <div className="flex flex-wrap gap-4 mb-4">
-                <select
-                    className="border rounded px-3 py-1"
-                    onChange={e => setStatusFilter(e.target.value)}
-                >
-                    <option value="">All Status</option>
-                    <option value="booked">Booked</option>
-                    <option value="due">Due Today</option>
-                    <option value="overdue">Overdue</option>
-                </select>
+                {/* Filters */}
+                <div className="flex flex-wrap gap-4 mb-4">
+                    <select
+                        className="border rounded px-3 py-1"
+                        onChange={e => setStatusFilter(e.target.value)}
+                    >
+                        <option value="">All Status</option>
+                        <option value="booked">Booked</option>
+                        <option value="due">Due Today</option>
+                        <option value="overdue">Overdue</option>
+                    </select>
 
-                <input
-                    type="date"
-                    className="border rounded px-3 py-1"
-                    onChange={e => setDateFilter(e.target.value)}
-                />
-            </div>
-            <div className="flex items-center gap-2">
-                <input
-                    type="checkbox"
-                    id="includePast"
-                    checked={includePast}
-                    onChange={(e) => setIncludePast(e.target.checked)}
-                />
-                <label htmlFor="includePast" className="text-sm">
-                    Show Past Rentals
-                </label>
-            </div>
+                    <input
+                        type="date"
+                        className="border rounded px-3 py-1"
+                        onChange={e => setDateFilter(e.target.value)}
+                    />
+                </div>
+                <div className="flex items-center gap-2">
+                    <input
+                        type="checkbox"
+                        id="includePast"
+                        checked={includePast}
+                        onChange={(e) => setIncludePast(e.target.checked)}
+                    />
+                    <label htmlFor="includePast" className="text-sm">
+                        Show Past Rentals
+                    </label>
+                </div>
 
 
-            <div style={{ height: 600 }}>
-                <Calendar
-                    localizer={localizer}
-                    events={filteredEvents}
-                    startAccessor="start"
-                    endAccessor="end"
-                    eventPropGetter={eventStyleGetter}
-                    onSelectEvent={event => setSelectedEvent(event)}
-                    onSelectSlot={(slotInfo) => alert(`No rentals on ${moment(slotInfo.start).format("LL")}`)}
-                    selectable
-                    views={['month', 'week', 'day', 'agenda']}
-                    view={view}
-                    onView={(newView) => setView(newView)}
-                    date={currentDate}
-                    onNavigate={(newDate) => setCurrentDate(newDate)}
-                    defaultView="month"
-                />
+                <div style={{ height: 600 }}>
+                    <Calendar
+                        localizer={localizer}
+                        events={filteredEvents}
+                        startAccessor="start"
+                        endAccessor="end"
+                        eventPropGetter={eventStyleGetter}
+                        onSelectEvent={event => setSelectedEvent(event)}
+                        onSelectSlot={(slotInfo) => alert(`No rentals on ${moment(slotInfo.start).format("LL")}`)}
+                        selectable
+                        views={['month', 'week', 'day', 'agenda']}
+                        view={view}
+                        onView={(newView) => setView(newView)}
+                        date={currentDate}
+                        onNavigate={(newDate) => setCurrentDate(newDate)}
+                        defaultView="month"
+                    />
 
-            </div>
+                </div>
 
-            {selectedEvent && (
-                <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
-                    <div className="bg-white p-6 rounded-lg shadow-lg w-[90%] max-w-lg">
-                        <h3 className="text-xl font-bold mb-2">{selectedEvent.title}</h3>
-                        <p><strong>From:</strong> {moment(selectedEvent.start).format("LL")}</p>
-                        <p><strong>To:</strong> {moment(selectedEvent.end).format("LL")}</p>
-                        <p><strong>Status:</strong> {selectedEvent.status}</p>
-                        <p><strong>Item:</strong> {selectedEvent.details.name}</p>
-                        <p><strong>Renter:</strong> {selectedEvent.details.renterName}</p>
-                        <p><strong>Contact:</strong> {selectedEvent.details.renterContact}</p>
-                        <div className="mt-4 flex justify-end gap-2">
-                            <button
-                                className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded"
-                                onClick={() => alert("Contacting renter...")}
-                            >
-                                Contact Renter
-                            </button>
-                            <button
-                                className="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded"
-                                onClick={() => setSelectedEvent(null)}
-                            >
-                                Close
-                            </button>
+                {selectedEvent && (
+                    <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+                        <div className="bg-white p-6 rounded-lg shadow-lg w-[90%] max-w-lg">
+                            <h3 className="text-xl font-bold mb-2">{selectedEvent.title}</h3>
+                            <p><strong>From:</strong> {moment(selectedEvent.start).format("LL")}</p>
+                            <p><strong>To:</strong> {moment(selectedEvent.end).format("LL")}</p>
+                            <p><strong>Status:</strong> {selectedEvent.status}</p>
+                            <p><strong>Item:</strong> {selectedEvent.details.name}</p>
+                            <p><strong>Renter:</strong> {selectedEvent.details.renterName}</p>
+                            <p><strong>Contact:</strong> {selectedEvent.details.renterContact}</p>
+                            <div className="mt-4 flex justify-end gap-2">
+                                <button
+                                    className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded"
+                                    onClick={() => alert("Contacting renter...")}
+                                >
+                                    Contact Renter
+                                </button>
+                                <button
+                                    className="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded"
+                                    onClick={() => setSelectedEvent(null)}
+                                >
+                                    Close
+                                </button>
+                            </div>
                         </div>
                     </div>
-                </div>
-            )}
+                )}
 
-            {showOverdueDialog && (
-                <OverdueManager
-                    overdueItems={alerts}
-                    onClose={() => setShowOverdueDialog(false)}
-                />
-            )}
+                {showOverdueDialog && (
+                    <OverdueManager
+                        overdueItems={alerts}
+                        onClose={() => setShowOverdueDialog(false)}
+                    />
+                )}
 
+            </div>
         </div>
     );
 }

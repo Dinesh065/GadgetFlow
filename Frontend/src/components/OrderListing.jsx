@@ -177,7 +177,7 @@ const ManageListings = () => {
   };
 
   return (
-    <div className="max-w-[1200px] mx-auto p-6">
+    <div className="max-w-[1200px] mx-auto pt-24">
       <h1 className="text-3xl font-bold text-center mb-6">Manage Listings</h1>
 
       <div className="bg-yellow-50 border border-yellow-400 rounded-lg p-4 flex flex-wrap justify-center gap-4 mb-6">

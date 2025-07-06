@@ -150,202 +150,204 @@ const BuyerProfilePage = () => {
   };
 
   return (
-    <div className="max-w-4xl mx-auto p-6 bg-white shadow-lg rounded-2xl">
-      {/* Upper Section */}
-      <div className="flex gap-6 border-b pb-6">
-        <div className="w-60">
-          <label className="cursor-pointer block w-full h-60 overflow-hidden border border-gray-300 rounded-md">
-            <img
-              src={
-                formData.profileImage
-                  ? formData.profileImage instanceof File
-                    ? URL.createObjectURL(formData.profileImage)
-                    : formData.profileImage // if it's already a URL string
-                  : "/default-profile.png"
-              }
-              alt="Profile"
-              className="w-full h-full object-cover rounded-md"
-            />
+    <div className="pt-24 pb-12 min-h-screen bg-gray-50 overflow-y-auto">
+      <div className="max-w-4xl mx-auto p-6 bg-white shadow-lg rounded-2xl">
+        {/* Upper Section */}
+        <div className="flex gap-6 border-b pb-6">
+          <div className="w-60">
+            <label className="cursor-pointer block w-full h-60 overflow-hidden border border-gray-300 rounded-md">
+              <img
+                src={
+                  formData.profileImage
+                    ? formData.profileImage instanceof File
+                      ? URL.createObjectURL(formData.profileImage)
+                      : formData.profileImage // if it's already a URL string
+                    : "/default-profile.png"
+                }
+                alt="Profile"
+                className="w-full h-full object-cover rounded-md"
+              />
 
+              <input
+                type="file"
+                name="profileImage"
+                accept="image/*"
+                className={`hudden border-b p-2 outline-none ${errors.contactNumber ? 'border-red-500' : ''}`}
+
+                // className="hidden"
+                onChange={handleInputChange}
+              />
+            </label>
+          </div>
+
+          <div className="flex-1 grid grid-cols-2 gap-4">
+            <input
+              type="text"
+              name="fullName"
+              value={formData.fullName}
+              onChange={handleInputChange}
+              className="border-b p-2 outline-none"
+              placeholder="Name"
+              required
+            />
+            <input
+              type="email"
+              name="email"
+              value={formData.email}
+              onChange={handleInputChange}
+              className="border-b p-2 outline-none"
+              placeholder="Email"
+              required
+            />
+            {!changePasswordMode ? (
+              <div className="relative col-span-2">
+                <input
+                  type={showPassword ? "text" : "password"}
+                  name="password"
+                  value={formData.password}
+                  disabled
+                  className="border-b p-2 w-full pr-10 outline-none"
+                />
+                {/* Eye Icon aligned slightly higher */}
+                <div
+                  className="absolute right-2 top-[30%] transform -translate-y-1/2 cursor-pointer"
+                  onClick={() => setShowPassword(!showPassword)}
+                >
+                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                </div>
+
+                {/* Change Password button */}
+                <button
+                  className="text-blue-500 text-sm absolute right-0 -bottom-1"
+                  onClick={() => setChangePasswordMode(true)}
+                  type="button"
+                >
+                  Change Password
+                </button>
+              </div>
+            ) : (
+              <>
+                <div className="col-span-1 relative">
+                  <input
+                    type="password"
+                    name="newPassword"
+                    value={formData.newPassword}
+                    onChange={handleInputChange}
+                    className="border-b p-2 w-full outline-none"
+                    placeholder="New Password"
+                    required
+                  />
+                </div>
+                <div className="col-span-1 relative">
+                  <input
+                    type="password"
+                    name="confirmPassword"
+                    value={formData.confirmPassword}
+                    onChange={handleInputChange}
+                    className="border-b p-2 w-full outline-none"
+                    placeholder="Confirm Password"
+                    required
+                  />
+                </div>
+              </>
+            )}
+            <input
+              type="text"
+              name="role"
+              value={formData.role}
+              disabled
+              className="border-b p-2 bg-gray-100 outline-none"
+            />
+          </div>
+        </div>
+
+        {/* Lower Section */}
+        <div className="grid grid-cols-2 gap-4 pt-6">
+          <input
+            type="tel"
+            name="contactNumber"
+            value={formData.contactNumber}
+            onChange={handleInputChange}
+            className={`border-b p-2 outline-none ${errors.contactNumber ? 'border-red-500' : ''}`}
+            placeholder="Contact Number"
+            required
+          />
+          <input
+            type="tel"
+            name="alternateContact"
+            value={formData.alternateContact}
+            onChange={handleInputChange}
+            className="border-b p-2 outline-none"
+            placeholder="Alternate Contact (Optional)"
+          />
+          <input
+            type="text"
+            name="address"
+            value={formData.address}
+            onChange={handleInputChange}
+            className={`border-b p-2 outline-none ${errors.contactNumber ? 'border-red-500' : ''}`}
+            placeholder="Address"
+            required
+          />
+          <input
+            type="text"
+            name="pickupLocation"
+            value={formData.pickupLocation}
+            onChange={handleInputChange}
+            className="border-b p-2 outline-none"
+            placeholder="Pickup Location (Optional)"
+          />
+
+          {/* Aadhaar Upload */}
+          <div className="col-span-2">
             <input
               type="file"
-              name="profileImage"
-              accept="image/*"
-              className={`hudden border-b p-2 outline-none ${errors.contactNumber ? 'border-red-500' : ''}`}
-
-              // className="hidden"
+              name="aadhaarDoc"
+              accept="application/pdf,image/*"
               onChange={handleInputChange}
+              className={`border-b p-2 w-full outline-none ${errors.contactNumber ? 'border-red-500' : ''}`}
+
+            // className="border-b p-2 w-full outline-none"
             />
-          </label>
+            {aadhaarFileUrl && (
+              <div className="mt-2 flex items-center justify-between border p-2 rounded-md">
+                <a href={aadhaarFileUrl} target="_blank" rel="noopener noreferrer" className="text-blue-600 underline">
+                  View Uploaded Document
+                </a>
+                <div className="flex items-center gap-2">
+                  {isVerified && <span className="text-green-600 text-sm">Verified</span>}
+                  <XCircle
+                    className="text-red-500 cursor-pointer"
+                    size={20}
+                    onClick={handleRemoveAadhaar}
+                  />
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Bio */}
+          <textarea
+            name="bio"
+            value={formData.bio}
+            onChange={handleInputChange}
+            className="border-b p-2 outline-none col-span-2"
+            placeholder="Short Bio (Optional)"
+            rows={3}
+          />
         </div>
 
-        <div className="flex-1 grid grid-cols-2 gap-4">
-          <input
-            type="text"
-            name="fullName"
-            value={formData.fullName}
-            onChange={handleInputChange}
-            className="border-b p-2 outline-none"
-            placeholder="Name"
-            required
-          />
-          <input
-            type="email"
-            name="email"
-            value={formData.email}
-            onChange={handleInputChange}
-            className="border-b p-2 outline-none"
-            placeholder="Email"
-            required
-          />
-          {!changePasswordMode ? (
-            <div className="relative col-span-2">
-              <input
-                type={showPassword ? "text" : "password"}
-                name="password"
-                value={formData.password}
-                disabled
-                className="border-b p-2 w-full pr-10 outline-none"
-              />
-              {/* Eye Icon aligned slightly higher */}
-              <div
-                className="absolute right-2 top-[30%] transform -translate-y-1/2 cursor-pointer"
-                onClick={() => setShowPassword(!showPassword)}
-              >
-                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-              </div>
-
-              {/* Change Password button */}
-              <button
-                className="text-blue-500 text-sm absolute right-0 -bottom-1"
-                onClick={() => setChangePasswordMode(true)}
-                type="button"
-              >
-                Change Password
-              </button>
-            </div>
-          ) : (
-            <>
-              <div className="col-span-1 relative">
-                <input
-                  type="password"
-                  name="newPassword"
-                  value={formData.newPassword}
-                  onChange={handleInputChange}
-                  className="border-b p-2 w-full outline-none"
-                  placeholder="New Password"
-                  required
-                />
-              </div>
-              <div className="col-span-1 relative">
-                <input
-                  type="password"
-                  name="confirmPassword"
-                  value={formData.confirmPassword}
-                  onChange={handleInputChange}
-                  className="border-b p-2 w-full outline-none"
-                  placeholder="Confirm Password"
-                  required
-                />
-              </div>
-            </>
-          )}
-          <input
-            type="text"
-            name="role"
-            value={formData.role}
-            disabled
-            className="border-b p-2 bg-gray-100 outline-none"
-          />
+        {/* Save Button */}
+        <div className="flex justify-end pt-6">
+          <button
+            onClick={handleSave}
+            disabled={!isChanged}
+            className={`px-6 py-2 rounded text-white font-semibold ${isChanged ? "bg-blue-600 hover:bg-blue-700" : "bg-gray-400 cursor-not-allowed"
+              }`}
+          >
+            Save
+          </button>
         </div>
-      </div>
-
-      {/* Lower Section */}
-      <div className="grid grid-cols-2 gap-4 pt-6">
-        <input
-          type="tel"
-          name="contactNumber"
-          value={formData.contactNumber}
-          onChange={handleInputChange}
-          className={`border-b p-2 outline-none ${errors.contactNumber ? 'border-red-500' : ''}`}
-          placeholder="Contact Number"
-          required
-        />
-        <input
-          type="tel"
-          name="alternateContact"
-          value={formData.alternateContact}
-          onChange={handleInputChange}
-          className="border-b p-2 outline-none"
-          placeholder="Alternate Contact (Optional)"
-        />
-        <input
-          type="text"
-          name="address"
-          value={formData.address}
-          onChange={handleInputChange}
-          className={`border-b p-2 outline-none ${errors.contactNumber ? 'border-red-500' : ''}`}
-          placeholder="Address"
-          required
-        />
-        <input
-          type="text"
-          name="pickupLocation"
-          value={formData.pickupLocation}
-          onChange={handleInputChange}
-          className="border-b p-2 outline-none"
-          placeholder="Pickup Location (Optional)"
-        />
-
-        {/* Aadhaar Upload */}
-        <div className="col-span-2">
-          <input
-            type="file"
-            name="aadhaarDoc"
-            accept="application/pdf,image/*"
-            onChange={handleInputChange}
-            className={`border-b p-2 w-full outline-none ${errors.contactNumber ? 'border-red-500' : ''}`}
-
-          // className="border-b p-2 w-full outline-none"
-          />
-          {aadhaarFileUrl && (
-            <div className="mt-2 flex items-center justify-between border p-2 rounded-md">
-              <a href={aadhaarFileUrl} target="_blank" rel="noopener noreferrer" className="text-blue-600 underline">
-                View Uploaded Document
-              </a>
-              <div className="flex items-center gap-2">
-                {isVerified && <span className="text-green-600 text-sm">Verified</span>}
-                <XCircle
-                  className="text-red-500 cursor-pointer"
-                  size={20}
-                  onClick={handleRemoveAadhaar}
-                />
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* Bio */}
-        <textarea
-          name="bio"
-          value={formData.bio}
-          onChange={handleInputChange}
-          className="border-b p-2 outline-none col-span-2"
-          placeholder="Short Bio (Optional)"
-          rows={3}
-        />
-      </div>
-
-      {/* Save Button */}
-      <div className="flex justify-end pt-6">
-        <button
-          onClick={handleSave}
-          disabled={!isChanged}
-          className={`px-6 py-2 rounded text-white font-semibold ${isChanged ? "bg-blue-600 hover:bg-blue-700" : "bg-gray-400 cursor-not-allowed"
-            }`}
-        >
-          Save
-        </button>
       </div>
     </div>
   );

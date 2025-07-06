@@ -218,6 +218,40 @@ router.post('/delete-multiple', verifyJWT, async (req, res) => {
         res.status(500).json({ message: "Batch delete error" });
     }
 });
+router.post("/sellers/acknowledge-delivery", verifyJWT, async (req, res) => {
+  try {
+    const { productId, buyerId } = req.body;
+    const userId = req.user.id; // seller ID
+
+    const item = await Item.findById(productId);
+    if (!item || item.ownerId.toString() !== userId)
+      return res.status(403).json({ message: "Not authorized" });
+
+    const requestIndex = item.requests.findIndex(req =>
+      req.buyerId.toString() === buyerId &&
+      req.status === "Accepted" &&
+      req.paymentDone &&
+      req.buyerConfirmed
+    );
+
+    if (requestIndex === -1)
+      return res.status(400).json({ message: "Invalid request" });
+
+    item.requests[requestIndex].sellerAcknowledged = true;
+    item.status = "Rented";
+    item.rentalDate = new Date();
+    item.dueDate = new Date(Date.now() + item.days_for_rent * 24 * 60 * 60 * 1000);
+    item.renter = buyerId;
+
+    await item.save();
+
+    return res.status(200).json({ message: "Acknowledged and item rented successfully." });
+  } catch (err) {
+    console.error("Seller acknowledge error:", err);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
 
 router.get('/requests/:itemId', async (req, res) => {
     try {
@@ -242,33 +276,68 @@ router.get('/requests/:itemId', async (req, res) => {
     }
 });
 
+
+// router.post('/requests/accept/:requestId', async (req, res) => {
+//     try {
+//         const { requestId } = req.params;
+
+//         // Find the item that contains this request
+//         const item = await Item.findOne({ 'requests._id': requestId });
+
+//         if (!item) return res.status(404).json({ message: 'Item not found' });
+
+//         // Loop through and update all request statuses
+//         item.requests = item.requests.map(req => {
+//             if (req._id.toString() === requestId) {
+//                 req.status = 'Accepted';
+//                 req.acceptedAt = new Date(); // ✅ Set acceptedOn date here
+//             } else {
+//                 req.status = 'Rejected';
+//                 req.acceptedAt = null; // Optional: clear acceptedOn if previously set
+//             }
+//             return req;
+//         });
+
+//         // Also update the item’s overall status and assign renter if needed
+//         item.status = 'Accepted';
+//         const acceptedReq = item.requests.find(r => r._id.toString() === requestId);
+//         if (acceptedReq) {
+//             item.renter = acceptedReq.buyerId;
+//         }
+
+//         await item.save();
+
+//         res.status(200).json({ message: 'Request accepted and others rejected' });
+//     } catch (error) {
+//         console.error('Error accepting request:', error);
+//         res.status(500).json({ message: 'Server error' });
+//     }
+// });
+
 router.post('/requests/accept/:requestId', async (req, res) => {
     try {
         const { requestId } = req.params;
 
-        // Find the item that contains this request
         const item = await Item.findOne({ 'requests._id': requestId });
-
         if (!item) return res.status(404).json({ message: 'Item not found' });
 
-        // Loop through and update all request statuses
+        const acceptedAt = new Date();
+        const paymentDeadline = new Date(acceptedAt.getTime() + 24 * 60 * 60 * 1000);
+
         item.requests = item.requests.map(req => {
             if (req._id.toString() === requestId) {
                 req.status = 'Accepted';
-                req.acceptedAt = new Date(); // ✅ Set acceptedOn date here
+                req.acceptedAt = acceptedAt;
+                item.paymentDeadline = paymentDeadline; // ⏰ Set deadline
+                item.renter = req.buyerId;
             } else {
-                req.status = 'Rejected';
-                req.acceptedAt = null; // Optional: clear acceptedOn if previously set
+                req.status = 'Rejected'; // These will be reverted later by cron if payment isn't done
+                req.acceptedAt = null;
             }
             return req;
         });
 
-        // Also update the item’s overall status and assign renter if needed
         item.status = 'Accepted';
-        const acceptedReq = item.requests.find(r => r._id.toString() === requestId);
-        if (acceptedReq) {
-            item.renter = acceptedReq.buyerId;
-        }
 
         await item.save();
 

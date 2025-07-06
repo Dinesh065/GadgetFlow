@@ -5,6 +5,7 @@ import { verifyJWT } from "../middlewares/auth.middleware.js";
 import { User } from "../models/user.model.js";
 import { Review } from "../models/review.model.js";
 import { Wishlist } from "../models/wishlist.model.js";
+import nodemailer from "nodemailer";
 import dayjs from "dayjs";
 const router = Router();
 
@@ -89,11 +90,15 @@ router.get('/orders', verifyJWT, async (req, res) => {
 
           accepted.push({
             ...base,
-            acceptedAt,   // ✅ Now your frontend will get the real acceptance time
+            acceptedAt,
             dueDate,
             paymentDone: reqEntry.paymentDone || false,
+            deliveryType: reqEntry.deliveryType,
+            deliveryStatus: item.deliveryStatus,
+            rentalDate: item.rentalDate,
             orderId: `${item._id}-${reqEntry._id}`
           });
+
         }
         else if (reqEntry.status === 'Rejected') {
           rejected.push({
@@ -147,6 +152,58 @@ router.get("/accepted-orders", verifyJWT, async (req, res) => {
   } catch (err) {
     console.error("Error in /buyers/accepted-orders:", err);
     res.status(500).json({ error: "Server error while fetching accepted orders." });
+  }
+});
+
+router.post("/confirm-delivery", verifyJWT, async (req, res) => {
+  try {
+    const { productId } = req.body;
+    const userId = req.user.id;
+
+    const item = await Item.findById(productId).populate("ownerId renter");
+    if (!item) return res.status(404).json({ message: "Item not found" });
+
+    // Find the correct request object
+    const requestIndex = item.requests.findIndex(req =>
+      req.buyerId.toString() === userId && req.status === "Accepted"
+    );
+
+    if (requestIndex === -1)
+      return res.status(404).json({ message: "Request not found" });
+
+    // ✅ Update buyerConfirmed
+    item.requests[requestIndex].buyerConfirmed = true;
+    item.deliveryStatus = "Confirmed";
+    item.markModified("requests"); // ✅ Force Mongoose to notice the array change
+
+    await item.save();
+
+    // Notify seller
+    const transporter = nodemailer.createTransport({
+      service: "gmail",
+      auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS,
+      },
+    });
+
+    const mailOptions = {
+      from: `"Rental Platform" <${process.env.EMAIL_USER}>`,
+      to: item.ownerId.email,
+      subject: `Buyer confirmed ${item.deliveryType} for "${item.name}"`,
+      html: `
+        <p>Buyer <b>${item.renter.fullName}</b> has confirmed they've ${item.deliveryType === "delivery" ? "received" : "picked up"
+        } the item: <b>${item.name}</b>.</p>
+        <p>Please acknowledge to finalize the rental in the system.</p>
+      `,
+    };
+
+    transporter.sendMail(mailOptions);
+
+    return res.status(200).json({ message: "Buyer confirmation received. Awaiting seller." });
+  } catch (err) {
+    console.error("Confirm delivery error:", err);
+    res.status(500).json({ message: "Server error" });
   }
 });
 

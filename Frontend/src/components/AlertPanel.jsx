@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { AlertTriangle } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import dayjs from "dayjs";
@@ -7,8 +7,8 @@ dayjs.extend(duration);
 
 const AlertPanel = ({ alerts = [], onClose, onPay }) => {
     const navigate = useNavigate();
+    const [liveAlerts, setLiveAlerts] = useState([]);
 
-    // Disable background scroll when panel is open
     useEffect(() => {
         document.body.classList.add("overflow-hidden");
         return () => {
@@ -16,21 +16,29 @@ const AlertPanel = ({ alerts = [], onClose, onPay }) => {
         };
     }, []);
 
-    const processedAlerts = alerts
-        .filter(alert => alert.acceptedAt && !alert.paymentDone)
-        .map((alert) => {
-            const expiresAt = dayjs(alert.acceptedAt).add(24, "hour");
-            const now = dayjs();
-            const timeLeft = expiresAt.diff(now) > 0 ? expiresAt.diff(now) : 0;
+    // ⚡ Live timer effect
+    useEffect(() => {
+        const interval = setInterval(() => {
+            const updated = alerts
+                .filter(alert => alert.acceptedAt && !alert.paymentDone)
+                .map(alert => {
+                    const expiresAt = dayjs(alert.acceptedAt).add(24, "hour");
+                    const now = dayjs();
+                    const timeLeft = Math.max(expiresAt.diff(now), 0);
+                    return {
+                        id: alert._id,
+                        name: alert.name,
+                        timeLeft,
+                        paymentDone: alert.paymentDone,
+                        productId: alert.productId,
+                    };
+                });
 
-            return {
-                id: alert._id,
-                name: alert.name,
-                timeLeft,
-                paymentDone: alert.paymentDone,
-                productId: alert.productId,
-            };
-        });
+            setLiveAlerts(updated);
+        }, 1000); // update every second
+
+        return () => clearInterval(interval); // cleanup
+    }, [alerts]);
 
     const formatTimeLeft = (ms) => {
         const dur = dayjs.duration(ms);
@@ -40,8 +48,8 @@ const AlertPanel = ({ alerts = [], onClose, onPay }) => {
         return `${h}:${m}:${s}`;
     };
 
-    const handlePayNow = (alert) => {
-        onPay?.(alert); // call onPay only if provided
+    const handlePayNow = (productId) => {
+        onPay?.(productId);
         onClose?.();
     };
 
@@ -58,11 +66,11 @@ const AlertPanel = ({ alerts = [], onClose, onPay }) => {
             </div>
 
             <div className="p-4">
-                {processedAlerts.length === 0 ? (
+                {liveAlerts.length === 0 ? (
                     <div className="text-center text-gray-600">No pending alerts 🚀</div>
                 ) : (
                     <div className="flex flex-col gap-4">
-                        {processedAlerts.map((alert) => (
+                        {liveAlerts.map((alert) => (
                             <div
                                 key={alert.id}
                                 className="p-4 border-l-4 border-red-500 bg-red-50 rounded-md shadow"
@@ -81,7 +89,7 @@ const AlertPanel = ({ alerts = [], onClose, onPay }) => {
                                 </p>
                                 <div className="flex justify-end">
                                     <button
-                                        onClick={() => handlePayNow(alert)} 
+                                        onClick={() => handlePayNow(alert.productId)}
                                         className="bg-red-600 text-white px-4 py-1 rounded hover:bg-red-700 text-sm"
                                     >
                                         Pay Now

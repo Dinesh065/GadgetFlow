@@ -221,6 +221,13 @@ const SellerAddItemForm = ({ itemData, onClose, onSubmit }) => {
     });
 
     const [loading, setLoading] = useState(false);
+    useEffect(() => {
+        // Disable background scrolling
+        document.body.style.overflow = "hidden";
+        return () => {
+            document.body.style.overflow = "auto";
+        };
+    }, []);
 
     const handleDefaultAddressSelect = async () => {
         const ownerId = localStorage.getItem("ownerId");
@@ -358,9 +365,12 @@ const SellerAddItemForm = ({ itemData, onClose, onSubmit }) => {
 
 
     return (
-        <div className="fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-50 backdrop-blur-lg overflow-auto p-4">
-            <div className="bg-white p-6 rounded-md w-2/3 max-h-[90vh] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-200">
-                <h2 className="text-2xl font-semibold mb-4 text-center">{itemData ? "Edit Item" : "Add New Item"}</h2>
+        <div className="fixed inset-0 z-50 bg-gray-900 bg-opacity-50 backdrop-blur-sm flex items-center justify-center p-4">
+            <div className="bg-white w-full max-w-3xl h-[90vh] overflow-y-auto p-6 rounded-lg shadow-lg scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-100 relative">
+                <h2 className="text-2xl font-semibold mb-4 text-center">
+                    {itemData ? "Edit Item" : "Add New Item"}
+                </h2>
+
                 {loading && (
                     <div className="fixed inset-0 bg-black bg-opacity-40 z-50 flex items-center justify-center">
                         <div className="loader ease-linear rounded-full border-8 border-t-8 border-gray-200 h-24 w-24 animate-spin"></div>
@@ -368,8 +378,7 @@ const SellerAddItemForm = ({ itemData, onClose, onSubmit }) => {
                 )}
 
                 <form onSubmit={handleSubmit} className="space-y-4">
-                    {/* ... other inputs stay the same ... */}
-
+                    {/* Name */}
                     <div className="flex flex-col">
                         <label className="font-medium">Name</label>
                         <input
@@ -377,19 +386,20 @@ const SellerAddItemForm = ({ itemData, onClose, onSubmit }) => {
                             name="name"
                             value={formData.name}
                             onChange={handleChange}
-                            className="w-full p-2 border border-gray-300 rounded transition-all focus:border-blue-500 focus:ring-2 focus:ring-blue-300"
                             required
+                            className="p-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-300 focus:border-blue-500"
                         />
                     </div>
 
+                    {/* Category */}
                     <div className="flex flex-col">
                         <label className="font-medium">Category</label>
                         <select
                             name="category"
                             value={formData.category}
                             onChange={handleChange}
-                            className="w-full p-2 border border-gray-300 rounded transition-all focus:border-blue-500 focus:ring-2 focus:ring-blue-300"
                             required
+                            className="p-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-300 focus:border-blue-500"
                         >
                             <option value="">Select a category</option>
                             <option value="Electronics">Electronics</option>
@@ -400,10 +410,10 @@ const SellerAddItemForm = ({ itemData, onClose, onSubmit }) => {
                         </select>
                     </div>
 
+                    {/* Location */}
                     <div className="flex flex-col">
                         <label className="font-medium mb-1">Location</label>
-
-                        <div className="flex items-center space-x-4 mb-2">
+                        <div className="flex flex-col sm:flex-row sm:space-x-4 mb-2 space-y-2 sm:space-y-0">
                             <label className="flex items-center space-x-1">
                                 <input
                                     type="radio"
@@ -421,50 +431,40 @@ const SellerAddItemForm = ({ itemData, onClose, onSubmit }) => {
                                     checked={!useDefaultAddress}
                                     onChange={() => {
                                         setUseDefaultAddress(false);
-                                        setFormData((prev) => ({
-                                            ...prev,
-                                            location: "",
-                                        }));
+                                        setFormData(prev => ({ ...prev, location: "" }));
                                     }}
                                 />
                                 <span>Enter New Address</span>
                             </label>
                         </div>
 
-                        {!useDefaultAddress && (
+                        {!useDefaultAddress ? (
                             <input
                                 type="text"
                                 name="location"
                                 value={formData.location}
-                                onChange={(e) =>
-                                    setFormData((prev) => ({
-                                        ...prev,
-                                        location: e.target.value,
-                                    }))
-                                }
-                                className="w-full p-2 border border-gray-300 rounded transition-all focus:border-blue-500 focus:ring-2 focus:ring-blue-300"
+                                onChange={handleChange}
                                 required
+                                className="p-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-300 focus:border-blue-500"
                             />
-                        )}
-
-                        {useDefaultAddress && formData.location && (
-                            <div className="p-2 border rounded bg-gray-100 text-sm">
-                                {formData.location}
-                            </div>
+                        ) : (
+                            <div className="p-2 border rounded bg-gray-100 text-sm">{formData.location}</div>
                         )}
                     </div>
 
+                    {/* Description */}
                     <div className="flex flex-col">
                         <label className="font-medium">Description</label>
                         <textarea
                             name="description"
                             value={formData.description}
                             onChange={handleChange}
-                            className="w-full p-2 border border-gray-300 rounded transition-all focus:border-blue-500 focus:ring-2 focus:ring-blue-300"
                             required
+                            className="p-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-300 focus:border-blue-500"
                         />
                     </div>
 
+                    {/* Price */}
                     <div className="flex flex-col">
                         <label className="font-medium">Price</label>
                         <input
@@ -472,11 +472,12 @@ const SellerAddItemForm = ({ itemData, onClose, onSubmit }) => {
                             name="price"
                             value={formData.price}
                             onChange={handleChange}
-                            className="w-full p-2 border border-gray-300 rounded transition-all focus:border-blue-500 focus:ring-2 focus:ring-blue-300"
                             required
+                            className="p-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-300 focus:border-blue-500"
                         />
                     </div>
 
+                    {/* Days Available */}
                     <div className="flex flex-col">
                         <label className="font-medium">Days Available for Rent</label>
                         <input
@@ -484,47 +485,50 @@ const SellerAddItemForm = ({ itemData, onClose, onSubmit }) => {
                             name="days_for_rent"
                             value={formData.days_for_rent}
                             onChange={handleChange}
-                            className="w-full p-2 border border-gray-300 rounded transition-all focus:border-blue-500 focus:ring-2 focus:ring-blue-300"
                             required
+                            className="p-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-300 focus:border-blue-500"
                         />
                     </div>
 
-                    <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="availability">
-                        Availability
-                    </label>
-                    <select
-                        name="availability"
-                        value={formData.availability}
-                        onChange={handleChange}
-                        className="mb-4 block w-full p-2 border rounded"
-                    >
-                        <option value="Available">Available</option>
-                        <option value="Rented">Rented</option>
-                    </select>
+                    {/* Availability */}
+                    <div>
+                        <label className="block font-medium">Availability</label>
+                        <select
+                            name="availability"
+                            value={formData.availability}
+                            onChange={handleChange}
+                            className="w-full p-2 border rounded"
+                        >
+                            <option value="Available">Available</option>
+                            <option value="Rented">Rented</option>
+                        </select>
+                    </div>
 
-                    <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="deliveryOption">
-                        Delivery Option
-                    </label>
-                    <select
-                        name="delivery"
-                        value={formData.deliveryOptions.delivery ? "Delivery" : "Pickup"}
-                        onChange={(e) => {
-                            const isDelivery = e.target.value === "Delivery";
-                            setFormData((prev) => ({
-                                ...prev,
-                                deliveryOptions: {
-                                    ...prev.deliveryOptions,
-                                    delivery: isDelivery,
-                                    pickup: true  // Pickup is always true if delivery is selected
-                                }
-                            }));
-                        }}
-                        className="mb-4 block w-full p-2 border rounded"
-                    >
-                        <option value="Pickup">Pickup Only</option>
-                        <option value="Delivery">Delivery (includes Pickup)</option>
-                    </select>
+                    {/* Delivery Option */}
+                    <div>
+                        <label className="block font-medium">Delivery Option</label>
+                        <select
+                            name="delivery"
+                            value={formData.deliveryOptions.delivery ? "Delivery" : "Pickup"}
+                            onChange={(e) => {
+                                const isDelivery = e.target.value === "Delivery";
+                                setFormData(prev => ({
+                                    ...prev,
+                                    deliveryOptions: {
+                                        ...prev.deliveryOptions,
+                                        delivery: isDelivery,
+                                        pickup: true
+                                    }
+                                }));
+                            }}
+                            className="w-full p-2 border rounded"
+                        >
+                            <option value="Pickup">Pickup Only</option>
+                            <option value="Delivery">Delivery (includes Pickup)</option>
+                        </select>
+                    </div>
 
+                    {/* Delivery Cost */}
                     {formData.deliveryOptions.delivery && (
                         <div className="flex flex-col">
                             <label className="font-medium">Delivery Cost</label>
@@ -533,13 +537,14 @@ const SellerAddItemForm = ({ itemData, onClose, onSubmit }) => {
                                 name="deliveryCost"
                                 value={formData.deliveryOptions.deliveryCost}
                                 onChange={handleDeliveryOptionChange}
-                                className="w-full p-2 border border-gray-300 rounded transition-all focus:border-blue-500 focus:ring-2 focus:ring-blue-300"
                                 required
+                                className="p-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-300 focus:border-blue-500"
                             />
                             <p className="text-sm text-gray-500 mt-1">Includes pickup as well</p>
                         </div>
                     )}
 
+                    {/* Image Upload */}
                     <div className="flex flex-col items-center">
                         <label className="w-full h-40 border-2 border-dashed border-gray-400 flex flex-col items-center justify-center cursor-pointer rounded-lg">
                             <FiUpload size={30} className="text-gray-600" />
@@ -547,22 +552,17 @@ const SellerAddItemForm = ({ itemData, onClose, onSubmit }) => {
                             <input type="file" multiple name="images" accept="image/*" className="hidden" onChange={handleImageUpload} />
                         </label>
 
-                        {/* Image Preview with Remove Button */}
-                        <div className="mt-4 flex flex-wrap gap-2 justify-center">
+                        {/* Image Preview */}
+                        <div className="mt-4 flex flex-wrap gap-3 justify-center">
                             {formData.images.map((image, index) => {
                                 const src = typeof image === "string" ? image : URL.createObjectURL(image);
                                 return (
                                     <div key={index} className="relative w-24 h-24">
-                                        <img
-                                            src={src}
-                                            alt="Preview"
-                                            className="w-24 h-24 object-cover rounded border border-gray-300"
-                                        />
+                                        <img src={src} alt="Preview" className="w-full h-full object-cover rounded border" />
                                         <button
                                             type="button"
                                             onClick={() => handleRemoveImage(index)}
                                             className="absolute top-0 right-0 bg-red-600 text-white rounded-full w-6 h-6 flex items-center justify-center hover:bg-red-700 transition"
-                                            title="Remove image"
                                         >
                                             &times;
                                         </button>
@@ -572,17 +572,18 @@ const SellerAddItemForm = ({ itemData, onClose, onSubmit }) => {
                         </div>
                     </div>
 
-                    <div className="flex justify-between mt-4">
+                    {/* Buttons */}
+                    <div className="flex justify-between mt-6">
                         <button
                             type="button"
                             onClick={onClose}
-                            className="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600 transition-all"
+                            className="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600 transition"
                         >
                             Cancel
                         </button>
                         <button
                             type="submit"
-                            className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition-all"
+                            className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition"
                         >
                             {itemData ? "Update Item" : "Add Item"}
                         </button>
@@ -592,5 +593,6 @@ const SellerAddItemForm = ({ itemData, onClose, onSubmit }) => {
         </div>
     );
 };
+
 
 export default SellerAddItemForm;

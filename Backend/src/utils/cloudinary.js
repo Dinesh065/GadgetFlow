@@ -61,20 +61,24 @@ cloudinary.config({
 
 const uploadOnCloudinary = async (localFilePath) => {
     try {
-        
-        if (!localFilePath) return null
-        const normalizedPath = path.resolve(localFilePath);  
+        if (!localFilePath) return null;
+
+        const normalizedPath = path.resolve(localFilePath);
+
+        const fileExtension = path.extname(normalizedPath).toLowerCase();
+
+        const resourceType = fileExtension === ".pdf" ? "raw" : "image";
 
         const response = await cloudinary.uploader.upload(normalizedPath, {
-          resource_type: "image"
+            resource_type: resourceType,
         });
-        // console.log("file is uploaded on cloudinary",response.url);
+
         return response;
     } catch (error) {
         console.error("Cloudinary upload error:", error);
-        fs.unlinkSync(localFilePath) 
+        fs.unlinkSync(localFilePath);
         return null;
     }
-}
+};
 
-export {uploadOnCloudinary}
+export { uploadOnCloudinary }

@@ -8,16 +8,19 @@ import { User } from "../models/user.model.js";
 const router = express.Router();
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
+// This MUST be raw, not JSON
 router.post(
   "/webhook",
   bodyParser.raw({ type: "application/json" }),
   async (req, res) => {
+    // console.log("✅ Stripe Webhook Triggered");
+
     const sig = req.headers["stripe-signature"];
     let event;
 
     try {
       event = stripe.webhooks.constructEvent(
-        req.body,
+        req.body, // this is raw buffer
         sig,
         process.env.STRIPE_WEBHOOK_SECRET
       );
@@ -26,7 +29,6 @@ router.post(
       return res.status(400).send(`Webhook Error: ${err.message}`);
     }
 
-    // ✅ On payment success
     if (event.type === "checkout.session.completed") {
       const session = event.data.object;
       const { itemId, buyerId, deliveryType } = session.metadata;
@@ -36,11 +38,10 @@ router.post(
         if (!item) throw new Error("Item not found");
 
         const today = dayjs();
-        const rentalDate = today.add(1, "day").toDate(); // start from next day
+        const rentalDate = today.add(1, "day").toDate();
         const dueDate = today.add(item.days_for_rent + 1, "day").toDate();
 
-        // 🛠️ Update only the accepted request
-        const updatedRequests = item.requests.map((req) => {
+        item.requests = item.requests.map((req) => {
           if (
             req.buyerId.toString() === buyerId &&
             req.status === "Accepted"
@@ -49,12 +50,12 @@ router.post(
               ...req.toObject(),
               paymentDone: true,
               acceptedAt: req.acceptedAt || new Date(),
+              deliveryType: deliveryType, // ✅ will be saved
             };
           }
           return req;
         });
 
-        item.requests = updatedRequests;
         item.status = "Rented";
         item.renter = buyerId;
         item.rentalDate = rentalDate;
@@ -62,7 +63,10 @@ router.post(
 
         await item.save();
 
-        // 🚀 OPTIONAL: Notify seller
+        const saved = await Item.findById(itemId).lean();
+        const matched = saved.requests.find(r => r.buyerId.toString() === buyerId);
+        // console.log("✅ Final deliveryType in DB:", matched?.deliveryType);
+
         const seller = await User.findById(item.ownerId);
         console.log(
           `🔔 Seller ${seller.fullName} notified: Payment completed for "${item.name}"`

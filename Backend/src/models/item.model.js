@@ -99,12 +99,19 @@ const itemSchema = new mongoose.Schema(
         message: String,
         status: {
           type: String,
-          enum: ["Pending","Requested", "Accepted", "Rejected"],
+          enum: ["Pending", "Requested", "Accepted", "Rejected"],
           default: "Pending",
         },
         requestedAt: { type: Date, default: Date.now },
         acceptedAt: { type: Date, default: null },
         paymentDone: { type: Boolean, default: false },
+        deliveryType: {
+          type: String,
+          enum: ["pickup", "delivery"],
+          default: "pickup"
+        },
+        buyerConfirmed: { type: Boolean, default: false },         // ✅ ADD THIS
+        sellerAcknowledged: { type: Boolean, default: false },
       },
     ],
 
@@ -153,7 +160,7 @@ const itemSchema = new mongoose.Schema(
 
     warningSentAt: { type: Date, default: null },
     actionTaken: { type: Boolean, default: false },
-    
+
   },
   { timestamps: true }
 );

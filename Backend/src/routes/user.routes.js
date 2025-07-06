@@ -181,8 +181,9 @@ router.post(
                 if (newPassword !== confirmPassword) {
                     return res.status(400).json({ message: "Passwords do not match" });
                 }
-                const salt = await bcrypt.genSalt(10);
-                user.password = await bcrypt.hash(newPassword, salt);
+                // const salt = await bcrypt.genSalt(10);
+                // user.password = await bcrypt.hash(newPassword, salt);
+                user.password = newPassword; 
             }
 
             // Handle file uploads to Cloudinary

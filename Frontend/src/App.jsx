@@ -12,7 +12,7 @@ import FloatingIcons from "./components/FloatingIcons.jsx";
 import RentalCalendar from "./pages/RentalCalendar.jsx";
 import ProfilePage from "./pages/ProfilePage.jsx";
 import BuyerOrders from "./pages/BuyerOrders.jsx";
-import BuyerAccount from "./pages/BuyerAccount.jsx";
+// import BuyerAccount from "./pages/BuyerAccount.jsx";
 import ProductDetails from "./pages/ProductDetails.jsx";
 import BuyerProfilePage from "./components/BuyerProfilePage.jsx";
 import CheckoutPage from "./pages/CheckoutPage.jsx";
@@ -22,6 +22,9 @@ import OnboardStripe from "./components/OnboardStripe.jsx";
 import StripeSetupNotice from "./components/StripeSetupNotice.jsx";
 import SetupStripe from "./components/SetupStripe.jsx";
 import EarningsPage from "./components/EarningsPage.jsx";
+import MyRentals from "./pages/MyRentals.jsx";
+import SellerDeliveryManager from "./pages/SellerDeliveryManager.jsx";
+import ForgotPassword from "./pages/FortgotPassword.jsx";
 import { Toaster } from 'react-hot-toast';
 
 function App() {
@@ -73,6 +76,7 @@ function MainContent({ userRole, handleLogout, setUserRole }) {
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login setUserRole={setUserRole} />} />
         <Route path="/signup" element={<Signup setUserRole={setUserRole} />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
 
         {/* Protected Routes */}
         <Route
@@ -99,12 +103,12 @@ function MainContent({ userRole, handleLogout, setUserRole }) {
           path="/orders"
           element={userRole === "buyer" ? <BuyerOrders /> : <Navigate to="/login" />}
         />
-        <Route
-          path="/account"
+        {/* <Route
+          path="/buyer-account"
           element={userRole === "buyer" ? <BuyerAccount /> : <Navigate to="/login" />}
-        />
+        /> */}
         <Route
-          path="/account/buyer-profile"
+          path="/buyer-account"
           element={userRole === "buyer" ? <BuyerProfilePage /> : <Navigate to="/login" />}
         />
         <Route
@@ -134,6 +138,14 @@ function MainContent({ userRole, handleLogout, setUserRole }) {
         <Route
           path="/earnings"
           element={userRole === "seller" ? <EarningsPage /> : <Navigate to="/login" />}
+        />
+        <Route
+          path="/my-rentals"
+          element={userRole === "buyer" ? <MyRentals /> : <Navigate to="/login" />}
+        />
+        <Route
+          path="/delivery-tracking"
+          element={userRole === "seller" ? <SellerDeliveryManager /> : <Navigate to="/login" />}
         />
         {/* <Route
           path="/setup-stripe"
