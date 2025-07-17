@@ -26,6 +26,7 @@ import MyRentals from "./pages/MyRentals.jsx";
 import SellerDeliveryManager from "./pages/SellerDeliveryManager.jsx";
 import ForgotPassword from "./pages/FortgotPassword.jsx";
 import { Toaster } from 'react-hot-toast';
+import GadgetRentalLanding from "./pages/LandingPage.jsx";
 
 function App() {
   const [userRole, setUserRole] = useState(localStorage.getItem("userRole") || null);
@@ -61,7 +62,7 @@ function App() {
 function MainContent({ userRole, handleLogout, setUserRole }) {
   const location = useLocation();
 
-  const hideNavbar = ["/", "/login", "/signup"].includes(location.pathname);
+  const hideNavbar = ["/", "/login", "/signup", "/forgot-password"].includes(location.pathname);
   const hideFloatingIcons = hideNavbar;
 
   return (
@@ -73,7 +74,7 @@ function MainContent({ userRole, handleLogout, setUserRole }) {
 
       <Routes>
         {/* Public Routes */}
-        <Route path="/" element={<Home />} />
+        <Route path="/" element={<GadgetRentalLanding />} />
         <Route path="/login" element={<Login setUserRole={setUserRole} />} />
         <Route path="/signup" element={<Signup setUserRole={setUserRole} />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />

@@ -5,7 +5,16 @@ import axios from "axios";
 import toast from "react-hot-toast";
 import { API_BASE_URL } from "../config";
 
-const ProductCard = ({ id, images, name, price, description, isWishlisted: propWishlisted, rentalDuration }) => {
+const ProductCard = ({
+  id,
+  images,
+  name,
+  price,
+  description,
+  isWishlisted: propWishlisted,
+  rentalDuration,
+  status,
+}) => {
   const navigate = useNavigate();
   const [isWishlisted, setIsWishlisted] = useState(propWishlisted);
 
@@ -16,7 +25,7 @@ const ProductCard = ({ id, images, name, price, description, isWishlisted: propW
   const handleWishlistClick = async (e) => {
     e.stopPropagation(); // prevent card click
 
-    if (isWishlisted) return; // ✅ Do nothing if already wishlisted
+    if (isWishlisted) return;
 
     try {
       const token = localStorage.getItem("token");
@@ -39,11 +48,21 @@ const ProductCard = ({ id, images, name, price, description, isWishlisted: propW
     }
   };
 
+  const getStatusStyle = () => {
+    switch (status?.toLowerCase()) {
+      case "available":
+      default:
+        return "text-red-600 bg-red-100";
+    }
+  };
+
   return (
     <div className="rounded-md w-full relative shadow-md bg-white">
       {/* Wishlist Button */}
       <button
-        className={`absolute top-3 right-4 text-lg ${isWishlisted ? "text-red-500" : "text-gray-400 hover:text-red-500"}`}
+        className={`absolute top-3 right-4 text-lg ${
+          isWishlisted ? "text-red-500" : "text-gray-400 hover:text-red-500"
+        }`}
         onClick={handleWishlistClick}
       >
         <FaHeart />
@@ -64,9 +83,17 @@ const ProductCard = ({ id, images, name, price, description, isWishlisted: propW
         On rent for <span className="font-semibold">{rentalDuration}</span> days
       </p>
 
+      {/* Status */}
+      <p
+        className={`ml-4 mt-2 inline-block px-3 py-1 text-xs font-medium rounded-full ${getStatusStyle()}`}
+      >
+        {status === "available"
+          ? "Available"
+          : "Item Unavailable"}
+      </p>
+
       <p className="ml-4 text-gray-900 font-bold text-lg mt-1">{price}</p>
 
-      {/* Only this button is clickable now */}
       <button
         onClick={() => navigate(`/product/${id}`)}
         className="ml-4 mt-3 mb-5 bg-green-600 text-white px-4 py-2 w-half rounded-full hover:bg-green-700 transition"

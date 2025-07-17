@@ -8,4 +8,11 @@ export default {
     extend: {},
   },
   plugins: [],
+
+  theme: {
+    landingcontainer: {
+      center: true,
+      padding: "1rem",
+    },
+  },
 }

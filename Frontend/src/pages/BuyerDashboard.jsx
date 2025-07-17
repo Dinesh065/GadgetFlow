@@ -1,41 +1,47 @@
-import { FaSlidersH, FaSearch } from "react-icons/fa";
-// import ProductCard from "../components/ProductCard";
+import { FaSearch } from "react-icons/fa";
 import ProductCard from "../components/productCard.jsx";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
-import dayjs from "dayjs";
 import { API_BASE_URL } from "../config.jsx";
+import SummaryCards from "../components/SummaryCards.jsx";
 
 const BuyerDashboard = () => {
   const [searchTerm, setSearchTerm] = useState("");
-  const [priceFilter, setPriceFilter] = useState("");
-  const [brandFilter, setBrandFilter] = useState("");
-  const [ratingFilter, setRatingFilter] = useState("");
+  const [priceRange, setPriceRange] = useState(""); // low, mid, high
+  const [category, setCategory] = useState(""); // category filter
+  const [rating, setRating] = useState(""); // rating filter
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [wishlistItems, setWishlistItems] = useState([]);
 
   const navigate = useNavigate();
 
-  const wishlistCount = 5;
-  const status = "accepted";
-  const dueDate = "2025-06-20";
-  const today = dayjs();
-  const remainingDays = dayjs(dueDate).diff(today, "day");
-  const totalRentals = 12;
+  // Map price filter to actual range
+  const getPriceRange = (range) => {
+    switch (range) {
+      case "low":
+        return { min: 0, max: 100 };
+      case "mid":
+        return { min: 100, max: 300 };
+      case "high":
+        return { min: 300, max: undefined };
+      default:
+        return {};
+    }
+  };
 
-  const [wishlistItems, setWishlistItems] = useState([]);
-
+  // Fetch wishlist
   useEffect(() => {
     const fetchWishlist = async () => {
       try {
         const token = localStorage.getItem("token");
         if (token) {
           const res = await axios.get(`${API_BASE_URL}/buyers/wishlist`, {
-            headers: { Authorization: `Bearer ${token}` }
+            headers: { Authorization: `Bearer ${token}` },
           });
-          setWishlistItems(res.data.wishlist.map(entry => entry.itemId._id));
+          setWishlistItems(res.data.wishlist.map((entry) => entry.itemId._id));
         }
       } catch (err) {
         console.error("Failed to fetch wishlist", err);
@@ -45,21 +51,22 @@ const BuyerDashboard = () => {
     fetchWishlist();
   }, []);
 
-  // Fetch products from backend
+  // Fetch products
   useEffect(() => {
     const fetchProducts = async () => {
       try {
         setLoading(true);
-        const response = await axios.get(`${API_BASE_URL}/buyers/items`, {
-          params: {
-            category: brandFilter,
-            // minPrice: priceFilter === "low" ? 0 : priceFilter === "mid" ? 100 : undefined,
-            // maxPrice: priceFilter === "low" ? 99 : priceFilter === "mid" ? 300 : priceFilter === "high" ? undefined : undefined,
-            rating: ratingFilter,
-          },
-        });
 
-        setProducts(response.data);
+        const { min, max } = getPriceRange(priceRange);
+        const params = {
+          category: category || undefined,
+          rating: rating || undefined,
+          minPrice: min,
+          maxPrice: max,
+        };
+
+        const res = await axios.get(`${API_BASE_URL}/buyers/items`, { params });
+        setProducts(res.data);
         setError(null);
       } catch (err) {
         console.error("Error fetching products:", err);
@@ -71,76 +78,46 @@ const BuyerDashboard = () => {
     };
 
     fetchProducts();
-  }, [brandFilter, priceFilter, ratingFilter]);
+  }, [priceRange, category, rating]);
 
-  // Filter by search only (other filters are server-side)
   const filteredProducts = products.filter((product) =>
     product.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   return (
-    <div className="mt-20 p-6 pt-0 w-5/6 w-full mx-auto">
+    <div className="mt-20 p-6 w-full max-w-screen-2xl mx-auto">
       {/* Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-        <div className="flex flex-col h-full bg-blue-100 p-6 rounded-xl shadow-md">
-          <h3 className="text-xl font-semibold mb-2">Wishlist Items</h3>
-          <p className="text-3xl font-bold text-blue-700">{wishlistCount}</p>
-          <button
-            onClick={() => navigate("/account", { state: { section: "wishlist" } })}
-            className="mt-auto w-fit px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition"
-          >
-            View Wishlist
-          </button>
-        </div>
-
-        <div className="bg-yellow-100 p-6 rounded-xl shadow-md">
-          <h3 className="text-xl font-semibold mb-2">Laptop</h3>
-          <p className="text-lg">Status: {status}</p>
-          <p className="text-lg">Return by: <strong>{dueDate}</strong></p>
-          <p className="text-lg text-yellow-700">{remainingDays} days remaining</p>
-          <button
-            onClick={() => navigate("/orders")}
-            className="mt-4 px-4 py-2 bg-yellow-500 text-white rounded hover:bg-yellow-600 transition"
-          >
-            View Orders
-          </button>
-        </div>
-
-        <div className="flex flex-col h-full bg-green-100 p-6 rounded-xl shadow-md">
-          <h3 className="text-xl font-semibold mb-2">Total Rentals</h3>
-          <p className="text-3xl font-bold text-green-700">{totalRentals}</p>
-          <button
-            onClick={() => navigate("/myrentals")}
-            className="mt-auto px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition w-fit"
-          >
-            My Rentals
-          </button>
-        </div>
-      </div>
+      <SummaryCards/>
 
       {/* Filters */}
-      <h2 className="text-2xl font-bold mt-6 pb-6">Products:</h2>
+      <h2 className="text-2xl font-bold mt-6 pb-4">Browse Products</h2>
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
         <div className="flex flex-wrap gap-3">
-          {/* Price Filter */}
-          <select onChange={(e) => setPriceFilter(e.target.value)} className="px-4 py-2 rounded-full bg-gray-100 text-gray-700">
+          <select
+            onChange={(e) => setPriceRange(e.target.value)}
+            className="px-4 py-2 rounded-full bg-gray-100 text-gray-700"
+          >
             <option value="">Price</option>
             <option value="low">Below $100</option>
             <option value="mid">$100 - $300</option>
             <option value="high">Above $300</option>
           </select>
 
-          {/* Brand Filter */}
-          <select onChange={(e) => setBrandFilter(e.target.value)} className="px-4 py-2 rounded-full bg-gray-100 text-gray-700">
-            <option value="">Brand</option>
-            <option value="airpods">AirPods</option>
-            <option value="bose">Bose</option>
-            <option value="jbl">JBL</option>
-            <option value="mpow">Mpow</option>
+          <select
+            onChange={(e) => setCategory(e.target.value)}
+            className="px-4 py-2 rounded-full bg-gray-100 text-gray-700"
+          >
+            <option value="">Category</option>
+            <option value="laptop">Laptop</option>
+            <option value="camera">Camera</option>
+            <option value="headphones">Headphones</option>
+            <option value="smartwatch">Smartwatch</option>
           </select>
 
-          {/* Rating Filter */}
-          <select onChange={(e) => setRatingFilter(e.target.value)} className="px-4 py-2 rounded-full bg-gray-100 text-gray-700">
+          <select
+            onChange={(e) => setRating(e.target.value)}
+            className="px-4 py-2 rounded-full bg-gray-100 text-gray-700"
+          >
             <option value="">Rating</option>
             <option value="5">5 Stars</option>
             <option value="4">4 Stars</option>
@@ -148,8 +125,7 @@ const BuyerDashboard = () => {
           </select>
         </div>
 
-        {/* Search Bar */}
-        <div className="md:flex items-center border border-gray-300 rounded-full px-4 py-2 bg-gray-100 w-96 md:w-64">
+        <div className="flex items-center border border-gray-300 rounded-full px-4 py-2 bg-gray-100 w-full md:w-64">
           <input
             type="text"
             placeholder="Search Product"
@@ -167,7 +143,7 @@ const BuyerDashboard = () => {
       ) : error ? (
         <p className="text-center text-red-500">{error}</p>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-10">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-10">
           {filteredProducts.map((product) => (
             <ProductCard
               key={product._id}
@@ -178,6 +154,7 @@ const BuyerDashboard = () => {
               description={product.description}
               rentalDuration={product.days_for_rent}
               isWishlisted={wishlistItems.includes(product._id)}
+              status={product.status}
             />
           ))}
         </div>
