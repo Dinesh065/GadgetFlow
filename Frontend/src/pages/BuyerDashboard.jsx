@@ -1,5 +1,5 @@
 import { FaSearch } from "react-icons/fa";
-import ProductCard from "../components/productCard.jsx";
+import ProductCard from "../components/ProductCard.jsx";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
