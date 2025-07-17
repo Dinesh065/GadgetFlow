@@ -9,6 +9,7 @@ import {
   FaBoxOpen,
   FaMoneyBillWave
 } from "react-icons/fa";
+import { Zap } from "lucide-react";
 import { LogOut, ChevronDown } from "lucide-react";
 import axios from "axios";
 import { API_BASE_URL } from "../config";
@@ -71,7 +72,9 @@ const Navbar = ({ onLogout }) => {
       <div className="flex items-center gap-12">
 
         <div className="flex items-center space-x-2">
-          <img src="/images/Logo.png" alt="GadgetFlow Logo" className="h-10 w-auto" />
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-green-600">
+            <Zap className="h-5 w-5 text-white" />
+          </div>
           <h1 className="text-green-500 text-2xl font-bold">GadgetFlow</h1>
         </div>
       </div>

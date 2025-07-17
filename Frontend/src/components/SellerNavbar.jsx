@@ -80,6 +80,7 @@ import {
 import { FaMoneyBillWave } from "react-icons/fa";
 import { API_BASE_URL } from "../config";
 import axios from "axios";
+import { Zap } from "lucide-react"; // Importing Zap icon for logo
 
 const DEFAULT_PROFILE_IMAGE = "https://img.freepik.com/free-vector/blue-circle-with-white-user_78370-4707.jpg";
 
@@ -134,7 +135,9 @@ const SellerNavbar = ({ onLogout }) => {
 
         {/* Logo */}
         <div className="flex items-center space-x-2">
-          <img src="/images/Logo.png" alt="GadgetFlow Logo" className="h-10 w-auto" />
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-green-600">
+            <Zap className="h-5 w-5 text-white" />
+          </div>          
           <h1 className="text-gray-800 text-2xl font-bold">GadgetFlow</h1>
         </div>
 
