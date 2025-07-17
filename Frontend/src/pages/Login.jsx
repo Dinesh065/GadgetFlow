@@ -19,7 +19,7 @@ const Login = ({ setUserRole }) => {
 
   try {
     const url = `${API_BASE_URL}users/login`;
-    const response = await axios.post(url, { ...data, role });
+    const response = await axios.post(url, { ...data, role },{ withCredentials: false });
     const { token, role: userRole, ownerId } = response.data;
 
     localStorage.setItem("token", token);

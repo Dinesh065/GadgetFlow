@@ -25,8 +25,8 @@ app.use("/api/v1/webhook", webhookRoutes);
 
 // CORS and other middlewares
 const corsOptions = {
-    origin: process.env.CORS_ORIGIN || "*",
-    credentials: false,
+  origin: "http://localhost:5173",
+  credentials: true,
 };
 app.use(cors(corsOptions));
 app.use(express.json({ limit: "16kb" })); // 👈 this should come AFTER webhook
