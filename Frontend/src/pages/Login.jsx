@@ -18,7 +18,7 @@ const Login = ({ setUserRole }) => {
   setError("");
 
   try {
-    const url = `${API_BASE_URL}/users/login`;
+    const url = `${API_BASE_URL}users/login`;
     const response = await axios.post(url, { ...data, role });
     const { token, role: userRole, ownerId } = response.data;
 
