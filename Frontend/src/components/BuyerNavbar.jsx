@@ -133,25 +133,48 @@ const Navbar = ({ onLogout }) => {
       </div>
 
       {/* Mobile Nav */}
-      <div className={`lg:hidden fixed top-20 left-0 w-full bg-white shadow-md transition-transform transform ${isOpen ? "translate-x-0" : "-translate-x-full"} p-6`}>
+      <div className={`lg:hidden fixed top-20 left-0 w-full bg-white shadow-md transition-transform transform ${isOpen ? "translate-x-0" : "-translate-x-full"} p-6 z-40`}>
         <div className="flex flex-col gap-4">
-          <Link to="/" className="text-gray-700 hover:text-black transition text-lg flex items-center gap-2">
+          <Link to="/" className="text-gray-700 hover:text-black transition text-lg flex items-center gap-2" onClick={() => setIsOpen(false)}>
             <FaHome className="text-xl" /> Browse Items
           </Link>
-          <Link to="/orders" className="text-gray-700 hover:text-black transition text-lg flex items-center gap-2">
+          <Link to="/orders" className="text-gray-700 hover:text-black transition text-lg flex items-center gap-2" onClick={() => setIsOpen(false)}>
             <FaShoppingBag className="text-xl" /> Orders
           </Link>
-          <Link to="/wishlist" className="text-gray-700 hover:text-black transition text-lg flex items-center gap-2">
+          <Link to="/wishlist" className="text-gray-700 hover:text-black transition text-lg flex items-center gap-2" onClick={() => setIsOpen(false)}>
             <FaHeart className="text-xl" /> Wishlist
           </Link>
-          <Link to="/my-rentals" className="text-gray-700 hover:text-black transition text-lg flex items-center gap-2">
+          <Link to="/my-rentals" className="text-gray-700 hover:text-black transition text-lg flex items-center gap-2" onClick={() => setIsOpen(false)}>
             <FaBoxOpen className="text-xl" /> My Rentals
           </Link>
-          <Link to="/payment-history" className="text-gray-700 hover:text-black transition text-lg flex items-center gap-2">
+          <Link to="/payment-history" className="text-gray-700 hover:text-black transition text-lg flex items-center gap-2" onClick={() => setIsOpen(false)}>
             <FaMoneyBillWave className="text-xl" /> Payment History
           </Link>
+
+          {/* Divider */}
+          <hr className="my-2" />
+
+          {/* Profile and Logout */}
+          <Link to="/buyer-account" className="text-gray-700 hover:text-black transition text-lg flex items-center gap-2" onClick={() => setIsOpen(false)}>
+            <img
+              src={user?.profileImage || DEFAULT_PROFILE_IMAGE}
+              alt="profile"
+              className="h-6 w-6 rounded-full object-cover"
+            />
+            Profile
+          </Link>
+          <button
+            onClick={() => {
+              onLogout();
+              setIsOpen(false);
+            }}
+            className="text-red-600 hover:text-red-800 transition text-lg flex items-center gap-2"
+          >
+            <LogOut className="h-5 w-5" /> Logout
+          </button>
         </div>
       </div>
+
     </nav>
   );
 };

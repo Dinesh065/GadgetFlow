@@ -3,6 +3,8 @@ import Stripe from "stripe";
 import { Item } from "../models/item.model.js";
 import { User } from "../models/user.model.js";
 import { verifyJWT } from "../middlewares/auth.middleware.js";
+import PaymentModel from "../models/payment.model.js";
+import PDFDocument from 'pdfkit'
 const router = express.Router();
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
@@ -96,7 +98,7 @@ router.get("/earnings", verifyJWT, async (req, res) => {
     const result = items.map((item) => ({
       _id: item._id,
       itemName: item.name,
-      amount: item.price,
+      amount: item.totalPaid || item.price,
       buyerName: item.renter?.fullName || "N/A",
       date: item.rentalDate || item.updatedAt,
       status: item.status,
@@ -107,6 +109,33 @@ router.get("/earnings", verifyJWT, async (req, res) => {
     console.error("Error fetching seller earnings:", err);
     res.status(500).json({ error: "Failed to fetch earnings" });
   }
+});
+
+router.get("/invoice/:id", verifyJWT, async (req, res) => {
+  const paymentId = req.params.id;
+  console.log("Trying to download invoice for:", paymentId);
+
+  const payment = await PaymentModel.findById(paymentId).populate("buyer");
+
+  if (!payment) return res.status(404).send("Payment not found");
+
+  const doc = new PDFDocument();
+  res.setHeader("Content-Type", "application/pdf");
+  res.setHeader("Content-Disposition", `attachment; filename=invoice-${paymentId}.pdf`);
+  doc.pipe(res);
+
+  doc.fontSize(20).text("Invoice", { align: "center" });
+  doc.moveDown();
+
+  doc.fontSize(12).text(`Invoice ID: ${paymentId}`);
+  doc.text(`Buyer: ${payment.buyer.name}`);
+  doc.text(`Item: ${payment.itemName}`);
+  doc.text(`Amount: ₹${payment.amount}`);
+  doc.text(`Date: ${new Date(payment.date).toLocaleString()}`);
+  doc.text(`Status: ${payment.status}`);
+  doc.text(`Type: ${payment.deliveryType || 'Pickup'}`);
+
+  doc.end();
 });
 
 

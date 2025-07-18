@@ -151,37 +151,35 @@ const ProfilePage = () => {
 
   return (
     <div className="bg-white pt-20 pb-5">
-
-      <div className="max-w-4xl mx-auto p-6 bg-white shadow-lg rounded-2xl">
+      <div className="max-w-4xl mx-auto p-4 sm:p-6 bg-white shadow-lg rounded-2xl">
         {/* Upper Section */}
-        <div className="flex gap-6 border-b pb-6">
-          <div className="w-60">
+        <div className="flex flex-col lg:flex-row gap-6 border-b pb-6">
+          {/* Profile Image */}
+          <div className="w-full lg:w-60">
             <label className="cursor-pointer block w-full h-60 overflow-hidden border border-gray-300 rounded-md">
               <img
                 src={
                   formData.profileImage
                     ? formData.profileImage instanceof File
                       ? URL.createObjectURL(formData.profileImage)
-                      : formData.profileImage // if it's already a URL string
+                      : formData.profileImage
                     : "/default-profile.png"
                 }
                 alt="Profile"
                 className="w-full h-full object-cover rounded-md"
               />
-
               <input
                 type="file"
                 name="profileImage"
                 accept="image/*"
-                className={`hudden border-b p-2 outline-none ${errors.contactNumber ? 'border-red-500' : ''}`}
-
-                // className="hidden"
+                className="hidden"
                 onChange={handleInputChange}
               />
             </label>
           </div>
 
-          <div className="flex-1 grid grid-cols-2 gap-4">
+          {/* User Details */}
+          <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-4">
             <input
               type="text"
               name="fullName"
@@ -189,7 +187,6 @@ const ProfilePage = () => {
               onChange={handleInputChange}
               className="border-b p-2 outline-none"
               placeholder="Name"
-              required
             />
             <input
               type="email"
@@ -198,10 +195,10 @@ const ProfilePage = () => {
               onChange={handleInputChange}
               className="border-b p-2 outline-none"
               placeholder="Email"
-              required
             />
+
             {!changePasswordMode ? (
-              <div className="relative col-span-2">
+              <div className="relative col-span-1 md:col-span-2">
                 <input
                   type={showPassword ? "text" : "password"}
                   name="password"
@@ -209,15 +206,12 @@ const ProfilePage = () => {
                   disabled
                   className="border-b p-2 w-full pr-10 outline-none"
                 />
-                {/* Eye Icon aligned slightly higher */}
                 <div
-                  className="absolute right-2 top-[30%] transform -translate-y-1/2 cursor-pointer"
+                  className="absolute right-2 top-1/2 -translate-y-1/2 cursor-pointer"
                   onClick={() => setShowPassword(!showPassword)}
                 >
                   {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                 </div>
-
-                {/* Change Password button */}
                 <button
                   className="text-blue-500 text-sm absolute right-0 -bottom-1"
                   onClick={() => setChangePasswordMode(true)}
@@ -228,30 +222,25 @@ const ProfilePage = () => {
               </div>
             ) : (
               <>
-                <div className="col-span-1 relative">
-                  <input
-                    type="password"
-                    name="newPassword"
-                    value={formData.newPassword}
-                    onChange={handleInputChange}
-                    className="border-b p-2 w-full outline-none"
-                    placeholder="New Password"
-                    required
-                  />
-                </div>
-                <div className="col-span-1 relative">
-                  <input
-                    type="password"
-                    name="confirmPassword"
-                    value={formData.confirmPassword}
-                    onChange={handleInputChange}
-                    className="border-b p-2 w-full outline-none"
-                    placeholder="Confirm Password"
-                    required
-                  />
-                </div>
+                <input
+                  type="password"
+                  name="newPassword"
+                  value={formData.newPassword}
+                  onChange={handleInputChange}
+                  className="border-b p-2 w-full outline-none"
+                  placeholder="New Password"
+                />
+                <input
+                  type="password"
+                  name="confirmPassword"
+                  value={formData.confirmPassword}
+                  onChange={handleInputChange}
+                  className="border-b p-2 w-full outline-none"
+                  placeholder="Confirm Password"
+                />
               </>
             )}
+
             <input
               type="text"
               name="role"
@@ -263,15 +252,14 @@ const ProfilePage = () => {
         </div>
 
         {/* Lower Section */}
-        <div className="grid grid-cols-2 gap-4 pt-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-6">
           <input
             type="tel"
             name="contactNumber"
             value={formData.contactNumber}
             onChange={handleInputChange}
-            className={`border-b p-2 outline-none ${errors.contactNumber ? 'border-red-500' : ''}`}
+            className={`border-b p-2 outline-none ${errors.contactNumber ? "border-red-500" : ""}`}
             placeholder="Contact Number"
-            required
           />
           <input
             type="tel"
@@ -286,9 +274,8 @@ const ProfilePage = () => {
             name="address"
             value={formData.address}
             onChange={handleInputChange}
-            className={`border-b p-2 outline-none ${errors.contactNumber ? 'border-red-500' : ''}`}
+            className={`border-b p-2 outline-none ${errors.contactNumber ? "border-red-500" : ""}`}
             placeholder="Address"
-            required
           />
           <input
             type="text"
@@ -300,19 +287,22 @@ const ProfilePage = () => {
           />
 
           {/* Aadhaar Upload */}
-          <div className="col-span-2">
+          <div className="col-span-1 md:col-span-2">
             <input
               type="file"
               name="aadhaarDoc"
               accept="application/pdf,image/*"
               onChange={handleInputChange}
-              className={`border-b p-2 w-full outline-none ${errors.contactNumber ? 'border-red-500' : ''}`}
-
-            // className="border-b p-2 w-full outline-none"
+              className={`border-b p-2 w-full outline-none ${errors.contactNumber ? "border-red-500" : ""}`}
             />
             {aadhaarFileUrl && (
-              <div className="mt-2 flex items-center justify-between border p-2 rounded-md">
-                <a href={aadhaarFileUrl} target="_blank" rel="noopener noreferrer" className="text-blue-600 underline">
+              <div className="mt-2 flex flex-col sm:flex-row items-start sm:items-center justify-between border p-2 rounded-md">
+                <a
+                  href={aadhaarFileUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-blue-600 underline mb-2 sm:mb-0"
+                >
                   View Uploaded Document
                 </a>
                 <div className="flex items-center gap-2">
@@ -332,7 +322,7 @@ const ProfilePage = () => {
             name="bio"
             value={formData.bio}
             onChange={handleInputChange}
-            className="border-b p-2 outline-none col-span-2"
+            className="border-b p-2 outline-none col-span-1 md:col-span-2"
             placeholder="Short Bio (Optional)"
             rows={3}
           />
@@ -351,6 +341,7 @@ const ProfilePage = () => {
         </div>
       </div>
     </div>
+
   );
 };
 

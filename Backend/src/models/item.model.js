@@ -155,7 +155,10 @@ const itemSchema = new mongoose.Schema(
       delivery: { type: Boolean, default: false },
       deliveryCost: { type: Number, default: 0 },
     },
-
+    totalPaid: {
+      type: Number,
+      default: 0, // amount in INR
+    },
     ownerId: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
 
     warningSentAt: { type: Date, default: null },

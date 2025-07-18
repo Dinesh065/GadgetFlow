@@ -96,6 +96,8 @@ router.get('/orders', verifyJWT, async (req, res) => {
             deliveryType: reqEntry.deliveryType,
             deliveryStatus: item.deliveryStatus,
             rentalDate: item.rentalDate,
+            buyerConfirmed: reqEntry.buyerConfirmed || false, // ✅ Add this
+            sellerAcknowledged: reqEntry.sellerAcknowledged || false, // ✅ Add this if used
             orderId: `${item._id}-${reqEntry._id}`
           });
 

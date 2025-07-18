@@ -97,7 +97,7 @@ const SummaryCards = () => {
           <p className="text-4xl font-bold text-green-700">{acceptedOrders.length}</p>
         </div>
         <button
-          onClick={() => navigate("/myrentals")}
+          onClick={() => navigate("/my-rentals")}
           className="mt-6 px-5 py-2 text-white bg-green-600 hover:bg-green-700 rounded-xl transition w-fit"
         >
           My Rentals

@@ -17,23 +17,25 @@ const BuyerOrders = () => {
   const [confirmingOrder, setConfirmingOrder] = useState(null);
 
   useEffect(() => {
-    const fetchOrders = async () => {
-      try {
-        setLoading(true);
-        const token = localStorage.getItem("token");
-        const res = await axios.get(`${API_BASE_URL}/buyers/orders`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        setOrders(res.data);
-      } catch (err) {
-        console.error(err);
-        toast.error("Failed to load orders.");
-      } finally {
-        setLoading(false);
-      }
-    };
+
     fetchOrders();
   }, []);
+
+  const fetchOrders = async () => {
+    try {
+      setLoading(true);
+      const token = localStorage.getItem("token");
+      const res = await axios.get(`${API_BASE_URL}/buyers/orders`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setOrders(res.data);
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to load orders.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const confirmDelivery = async () => {
     try {
@@ -48,6 +50,7 @@ const BuyerOrders = () => {
       setShowConfirmDialog(false);
       setVisibleTrackCard(null);
       setConfirmingOrder(null);
+      fetchOrders();
     } catch (err) {
       console.error(err);
       toast.error("Failed to confirm.");
@@ -57,10 +60,16 @@ const BuyerOrders = () => {
   const renderTrackCard = (order) => {
     const deliveryMethod = order.deliveryType || order.delivery_type || order.delivery || "pickup";
     const label = deliveryMethod === "delivery" ? "Delivery" : "Pickup";
-    const message =
-      deliveryMethod === "delivery"
+    const alreadyConfirmed = order.buyerConfirmed;
+    console.log(alreadyConfirmed);
+    const message = alreadyConfirmed
+      ? order.sellerAcknowledged
+        ? `You have successfully confirmed the ${label.toLowerCase()}.`
+        : `You have confirmed. Waiting for seller to acknowledge the ${label.toLowerCase()}.`
+      : deliveryMethod === "delivery"
         ? "Your item will be delivered within 24 hours. Once received, please confirm."
         : "Please collect the item within 24 hours and then confirm.";
+
 
     return (
       <div className="bg-gray-100 rounded p-4 mt-2 w-full">
@@ -70,7 +79,11 @@ const BuyerOrders = () => {
             setConfirmingOrder(order);
             setShowConfirmDialog(true);
           }}
-          className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
+          disabled={alreadyConfirmed}
+          className={`px-4 py-2 rounded text-white transition ${alreadyConfirmed
+            ? "bg-gray-400 cursor-not-allowed"
+            : "bg-green-600 hover:bg-green-700"
+            }`}
         >
           Confirm {label}
         </button>
@@ -175,7 +188,7 @@ const BuyerOrders = () => {
   };
 
   return (
-    <div className="max-w-5xl mx-auto pt-20 px-4">
+    <div className="max-w-5xl mx-auto pt-28 px-4">
       <h1 className="text-2xl font-bold mb-4">My Orders</h1>
 
       <div className="flex gap-4 mb-6 border-b border-gray-300 pb-2">

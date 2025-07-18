@@ -150,11 +150,11 @@ const BuyerProfilePage = () => {
   };
 
   return (
-    <div className="pt-24 pb-12 min-h-screen bg-gray-50 overflow-y-auto">
+    <div className="pt-24 pb-12 min-h-screen bg-gray-50 overflow-y-auto px-4 sm:px-6 lg:px-8">
       <div className="max-w-4xl mx-auto p-6 bg-white shadow-lg rounded-2xl">
         {/* Upper Section */}
-        <div className="flex gap-6 border-b pb-6">
-          <div className="w-60">
+        <div className="flex flex-col md:flex-row gap-6 border-b pb-6">
+          <div className="w-full md:w-60 mx-auto">
             <label className="cursor-pointer block w-full h-60 overflow-hidden border border-gray-300 rounded-md">
               <img
                 src={
@@ -180,7 +180,7 @@ const BuyerProfilePage = () => {
             </label>
           </div>
 
-          <div className="flex-1 grid grid-cols-2 gap-4">
+          <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-4">
             <input
               type="text"
               name="fullName"
@@ -262,7 +262,7 @@ const BuyerProfilePage = () => {
         </div>
 
         {/* Lower Section */}
-        <div className="grid grid-cols-2 gap-4 pt-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-6">
           <input
             type="tel"
             name="contactNumber"

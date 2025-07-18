@@ -87,7 +87,7 @@ const ProductCard = ({
       <p
         className={`ml-4 mt-2 inline-block px-3 py-1 text-xs font-medium rounded-full ${getStatusStyle()}`}
       >
-        {status === "available"
+        {status === "Available"
           ? "Available"
           : "Item Unavailable"}
       </p>

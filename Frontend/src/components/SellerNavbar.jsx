@@ -131,18 +131,18 @@ const SellerNavbar = ({ onLogout }) => {
   return (
     <nav className={`fixed top-0 left-0 w-full z-50 transition-all duration-300 
       ${scrolled ? "bg-white/50 shadow-md backdrop-blur-md" : "bg-white shadow-md"}`}>
-      <div className="mx-auto flex justify-between items-center p-4 relative border-b ">
+      <div className="mx-auto flex flex-wrap justify-between items-center p-4 relative border-b ">
 
         {/* Logo */}
         <div className="flex items-center space-x-2">
           <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-green-600">
             <Zap className="h-5 w-5 text-white" />
-          </div>          
+          </div>
           <h1 className="text-gray-800 text-2xl font-bold">GadgetFlow</h1>
         </div>
 
         {/* Desktop Nav */}
-        <div className="hidden md:flex space-x-6 items-center">
+        <div className="hidden lg:flex space-x-6 items-center">
           <NavItem to="/seller-dashboard" icon={<Home size={20} />} text="Dashboard" currentPath={location.pathname} />
           <NavItem to="/manage-listings" icon={<List size={20} />} text="Manage Listings" currentPath={location.pathname} />
           <NavItem to="/rental-calendar" icon={<Calendar size={20} />} text="Rental Calendar" currentPath={location.pathname} />
@@ -174,26 +174,26 @@ const SellerNavbar = ({ onLogout }) => {
         </div>
 
         {/* Hamburger Button on right */}
-        <button className="md:hidden text-gray-800 absolute right-4" onClick={() => setIsOpen(!isOpen)}>
+        <button className="lg:hidden text-gray-800 absolute right-4" onClick={() => setIsOpen(!isOpen)}>
           {isOpen ? <X size={30} /> : <Menu size={30} />}
         </button>
       </div>
 
       {/* Mobile Menu */}
       {isOpen && (
-        <div className="md:hidden flex flex-col bg-gray-600 space-y-4 p-4">
+        <div className="lg:hidden flex flex-col bg-white space-y-4 p-4 shadow-md border-t">
           <NavItem to="/seller-dashboard" icon={<Home size={20} />} text="Dashboard" mobile />
           <NavItem to="/manage-listings" icon={<List size={20} />} text="Manage Listings" mobile />
           <NavItem to="/rental-calendar" icon={<Calendar size={20} />} text="Rental Calendar" mobile />
           <NavItem to="/earnings" icon={<FaMoneyBillWave size={20} />} text="My Earnings" mobile />
           <NavItem to="/delivery-tracking" icon={<FaMoneyBillWave size={20} />} text="Delivery/Pickup Tracking" mobile />
-          <Link to="/seller-profile" className="flex items-center space-x-2 text-white hover:text-gray-300">
+          <Link to="/seller-profile" className="flex items-center space-x-2 text-gray-800 hover:text-orange-600 px-4 py-2">
             <UserCircle size={20} />
             <span className="text-[17px]">Profile</span>
           </Link>
           <button
             onClick={onLogout}
-            className="border-2 border-white px-4 py-2 rounded-lg text-white hover:bg-white hover:text-orange-600 transition duration-300 flex items-center space-x-2"
+            className="border-2 border-gray-800 px-4 py-2 rounded-lg text-gray-800 hover:bg-orange-600 hover:text-white transition duration-300 flex items-center space-x-2"
           >
             <LogOut size={20} />
             <span className="text-[17px]">Logout</span>
@@ -215,7 +215,7 @@ const NavItem = ({ to, icon, text, mobile, currentPath }) => {
         className={`
           flex items-center space-x-2 px-2 transition-all duration-300
           ${mobile
-            ? "text-white py-2 px-4"
+            ? "text-gray-800 py-2 px-4 hover:text-orange-600"
             : "text-gray-800 text-[17px] font-medium hover:text-orange-600"}
         `}
       >
