@@ -44,7 +44,7 @@ export default function Testimonials() {
                   <CardDescription className="text-base">"{t.text}"</CardDescription>
                 </CardHeader>
                 <div className="px-6 pb-6 flex items-center space-x-4">
-                  <img src={userAvatar} alt={t.name} width={40} height={40} className="rounded-full" />
+                  <img src="/images/logo.png" alt={t.name} width={40} height={40} className="rounded-full" />
                   <div>
                     <p className="font-semibold">{t.name}</p>
                     <p className="text-sm text-gray-600">{t.role}</p>
