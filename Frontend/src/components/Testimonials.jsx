@@ -2,8 +2,7 @@ import { Card, CardHeader, CardDescription } from "./ui/card";
 import { Badge } from "./ui/badge";
 import { Star } from "lucide-react";
 import { motion } from "framer-motion";
-import userAvatar from "../../public/images/logo.png"; // Replace with actual user image or placeholder
-
+// import userAvatar from "../../public/images/logo.png";
 const testimonials = [
   {
     text: "RentTech saved me thousands! I needed a MacBook Pro for a project. Seamless rental, excellent condition.",
