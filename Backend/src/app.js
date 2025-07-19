@@ -25,8 +25,8 @@ app.use("/api/v1/webhook", webhookRoutes);
 
 // CORS and other middlewares
 const corsOptions = {
-  // origin: "*",
-  origin: "https://gadget-flow-fjo9.vercel.app",
+  origin: "*",
+  // origin: "https://gadget-flow-fjo9.vercel.app",
   credentials: true,
 };
 app.use(cors(corsOptions));

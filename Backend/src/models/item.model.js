@@ -89,7 +89,7 @@ const itemSchema = new mongoose.Schema(
 
     status: {
       type: String,
-      enum: ["Available", "Requested", "Accepted", "Paid", "Rented", "Returned"],
+      enum: ["Available", "Requested", "Accepted", "Paid", "Rented", "Returned", "waiting_ack"],
       default: "Available",
     },
 
@@ -112,6 +112,7 @@ const itemSchema = new mongoose.Schema(
         },
         buyerConfirmed: { type: Boolean, default: false },         // ✅ ADD THIS
         sellerAcknowledged: { type: Boolean, default: false },
+        sellerReturnAcknowledged: { type: Boolean, default: false },
       },
     ],
 

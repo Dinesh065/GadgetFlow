@@ -25,6 +25,7 @@ import EarningsPage from "./components/EarningsPage.jsx";
 import MyRentals from "./pages/MyRentals.jsx";
 import SellerDeliveryManager from "./pages/SellerDeliveryManager.jsx";
 import ForgotPassword from "./pages/FortgotPassword.jsx";
+import Footer from "./components/Footer.jsx";
 import { Toaster } from 'react-hot-toast';
 import GadgetRentalLanding from "./pages/LandingPage.jsx";
 
@@ -66,96 +67,99 @@ function MainContent({ userRole, handleLogout, setUserRole }) {
   const hideFloatingIcons = hideNavbar;
 
   return (
-    <>
+    <div className="flex flex-col min-h-screen">
       {!hideNavbar && userRole === "buyer" && <BuyerNavbar onLogout={handleLogout} />}
       {!hideNavbar && userRole === "seller" && <SellerNavbar className="bg-black" onLogout={handleLogout} />}
 
       {!hideFloatingIcons && <FloatingIcons />}
+      <div className="flex-grow">
+        <Routes>
+          {/* Public Routes */}
+          <Route path="/" element={<GadgetRentalLanding />} />
+          <Route path="/login" element={<Login setUserRole={setUserRole} />} />
+          <Route path="/signup" element={<Signup setUserRole={setUserRole} />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
 
-      <Routes>
-        {/* Public Routes */}
-        <Route path="/" element={<GadgetRentalLanding />} />
-        <Route path="/login" element={<Login setUserRole={setUserRole} />} />
-        <Route path="/signup" element={<Signup setUserRole={setUserRole} />} />
-        <Route path="/forgot-password" element={<ForgotPassword />} />
-
-        {/* Protected Routes */}
-        <Route
-          path="/buyer-dashboard"
-          element={userRole === "buyer" ? <BuyerDashboard /> : <Navigate to="/login" />}
-        />
-        <Route
-          path="/seller-dashboard"
-          element={userRole === "seller" ? <SellerDashboard /> : <Navigate to="/login" />}
-        />
-        <Route
-          path="/manage-listings"
-          element={userRole === "seller" ? <OrderListing /> : <Navigate to="/login" />}
-        />
-        <Route
-          path="/rental-calendar"
-          element={userRole === "seller" ? <RentalCalendar /> : <Navigate to="/login" />}
-        />
-        <Route
-          path="/seller-profile"
-          element={userRole === "seller" ? <ProfilePage /> : <Navigate to="/login" />}
-        />
-        <Route
-          path="/orders"
-          element={userRole === "buyer" ? <BuyerOrders /> : <Navigate to="/login" />}
-        />
-        {/* <Route
+          {/* Protected Routes */}
+          <Route
+            path="/buyer-dashboard"
+            element={userRole === "buyer" ? <BuyerDashboard /> : <Navigate to="/login" />}
+          />
+          <Route
+            path="/seller-dashboard"
+            element={userRole === "seller" ? <SellerDashboard /> : <Navigate to="/login" />}
+          />
+          <Route
+            path="/manage-listings"
+            element={userRole === "seller" ? <OrderListing /> : <Navigate to="/login" />}
+          />
+          <Route
+            path="/rental-calendar"
+            element={userRole === "seller" ? <RentalCalendar /> : <Navigate to="/login" />}
+          />
+          <Route
+            path="/seller-profile"
+            element={userRole === "seller" ? <ProfilePage /> : <Navigate to="/login" />}
+          />
+          <Route
+            path="/orders"
+            element={userRole === "buyer" ? <BuyerOrders /> : <Navigate to="/login" />}
+          />
+          {/* <Route
           path="/buyer-account"
           element={userRole === "buyer" ? <BuyerAccount /> : <Navigate to="/login" />}
         /> */}
-        <Route
-          path="/buyer-account"
-          element={userRole === "buyer" ? <BuyerProfilePage /> : <Navigate to="/login" />}
-        />
-        <Route
-          path="/product/:id"
-          element={userRole === "buyer" ? <ProductDetails /> : <Navigate to="/login" />}
-        />
-        <Route
-          path="/checkout/:productId"
-          element={userRole === "buyer" ? <CheckoutPage /> : <Navigate to="/login" />}
-        />
-        <Route
-          path="/wishlist"
-          element={userRole === "buyer" ? <WishlistPage /> : <Navigate to="/login" />}
-        />
-        <Route
-          path="/payment-success/:itemId"
-          element={userRole === "buyer" ? <PaymentSuccess /> : <Navigate to="/login" />}
-        />
-        <Route
-          path="/onboard-stripe"
-          element={userRole === "seller" ? <OnboardStripe /> : <Navigate to="/login" />}
-        />
-        <Route
-          path="/setup-stripe"
-          element={userRole === "seller" ? <SetupStripe /> : <Navigate to="/login" />}
-        />
-        <Route
-          path="/earnings"
-          element={userRole === "seller" ? <EarningsPage /> : <Navigate to="/login" />}
-        />
-        <Route
-          path="/my-rentals"
-          element={userRole === "buyer" ? <MyRentals /> : <Navigate to="/login" />}
-        />
-        <Route
-          path="/delivery-tracking"
-          element={userRole === "seller" ? <SellerDeliveryManager /> : <Navigate to="/login" />}
-        />
-        {/* <Route
+          <Route
+            path="/buyer-account"
+            element={userRole === "buyer" ? <BuyerProfilePage /> : <Navigate to="/login" />}
+          />
+          <Route
+            path="/product/:id"
+            element={userRole === "buyer" ? <ProductDetails /> : <Navigate to="/login" />}
+          />
+          <Route
+            path="/checkout/:productId"
+            element={userRole === "buyer" ? <CheckoutPage /> : <Navigate to="/login" />}
+          />
+          <Route
+            path="/wishlist"
+            element={userRole === "buyer" ? <WishlistPage /> : <Navigate to="/login" />}
+          />
+          <Route
+            path="/payment-success/:itemId"
+            element={userRole === "buyer" ? <PaymentSuccess /> : <Navigate to="/login" />}
+          />
+          <Route
+            path="/onboard-stripe"
+            element={userRole === "seller" ? <OnboardStripe /> : <Navigate to="/login" />}
+          />
+          <Route
+            path="/setup-stripe"
+            element={userRole === "seller" ? <SetupStripe /> : <Navigate to="/login" />}
+          />
+          <Route
+            path="/earnings"
+            element={userRole === "seller" ? <EarningsPage /> : <Navigate to="/login" />}
+          />
+          <Route
+            path="/my-rentals"
+            element={userRole === "buyer" ? <MyRentals /> : <Navigate to="/login" />}
+          />
+          <Route
+            path="/delivery-tracking"
+            element={userRole === "seller" ? <SellerDeliveryManager /> : <Navigate to="/login" />}
+          />
+          {/* <Route
           path="/setup-stripe"
           element={userRole === "seller" ? <StripeSetupNotice /> : <Navigate to="/login" />}
         /> */}
 
-        {/* Add additional routes here -> */}
-      </Routes>
-    </>
+          {/* Add additional routes here -> */}
+        </Routes>
+      </div>
+      {!hideNavbar && <Footer />}
+
+    </div>
   );
 }
 

@@ -29,8 +29,12 @@ const HeroSection = () => {
           </motion.p>
           <motion.div variants={fadeInUp} className="flex gap-4">
             <Button onClick={() => navigate("/buyer-dashboard")}
-            className="bg-green-600 hover:bg-green-700">Browse Rentals</Button>
-            <Button variant="outline" className="border-green-600 text-green-600">Learn More</Button>
+              className="bg-green-600 hover:bg-green-700">Browse Rentals</Button>
+            {/* <a href="#how-it-works">
+              <Button variant="outline" className="mt-4">
+                Learn More
+              </Button>
+            </a> */}
           </motion.div>
           <motion.div variants={fadeInUp} className="flex gap-8 text-sm text-gray-600">
             <div className="flex items-center space-x-2"><Shield className="h-4 w-4 text-green-500" /><span>Verified</span></div>
@@ -52,7 +56,7 @@ const HeroSection = () => {
             width="600"
             height="500"
             className="relative rounded-2xl shadow-2xl"
-            />
+          />
 
         </motion.div>
       </div>

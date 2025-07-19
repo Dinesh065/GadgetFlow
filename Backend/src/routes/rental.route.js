@@ -2,6 +2,7 @@
 import express from "express";
 import { Item } from "../models/item.model.js";
 import mongoose from "mongoose";
+import nodemailer from "nodemailer";
 import { verifyJWT } from "../middlewares/auth.middleware.js";
 
 const router = express.Router();
@@ -112,16 +113,39 @@ router.get("/getAllRentals", verifyJWT, async (req, res) => {
 
 router.post("/requestReturn", verifyJWT, async (req, res) => {
   const { itemId } = req.body;
+
   try {
-    const item = await Item.findById(itemId).populate("owner renter");
+    const item = await Item.findById(itemId).populate("ownerId renter");
+
     if (!item) return res.status(404).json({ message: "Item not found" });
 
     item.status = "waiting_ack";
     item.returnRequestedAt = new Date();
     await item.save();
 
-    // Send email to seller here
-    sendEmail(item.owner.email, "Return Request", `The user ${item.renter.name} wants to return item ${item.name}. Please acknowledge.`);
+    // ✅ Send email notification to owner
+    if (item.ownerId?.email) {
+      const transporter = nodemailer.createTransport({
+        service: "gmail",
+        auth: {
+          user: process.env.EMAIL_USER,
+          pass: process.env.EMAIL_PASS,
+        },
+      });
+
+      const mailOptions = {
+        from: `"${item.renter.name} via Rental Platform" <${process.env.EMAIL_USER}>`,
+        to: item.ownerId.email,
+        subject: "Return Request",
+        html: `
+    <p>Hello ${item.ownerId.name},</p>
+    <p>The user <b>${item.renter.name}</b> has requested to return the item: <b>${item.name}</b>.</p>
+    <p>Please acknowledge the return in your dashboard.</p>
+  `,
+      };
+
+      await transporter.sendMail(mailOptions);
+    }
 
     res.json({ message: "Return request sent" });
   } catch (err) {
@@ -129,6 +153,5 @@ router.post("/requestReturn", verifyJWT, async (req, res) => {
     res.status(500).json({ message: "Error sending return request" });
   }
 });
-
 
 export default router;

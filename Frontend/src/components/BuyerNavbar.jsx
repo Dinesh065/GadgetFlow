@@ -93,9 +93,9 @@ const Navbar = ({ onLogout }) => {
         <Link to="/my-rentals" className="flex items-center gap-2 text-gray-700 hover:text-black transition text-lg">
           <FaBoxOpen className="text-xl" /> My Rentals
         </Link>
-        <Link to="/payment-history" className="flex items-center gap-2 text-gray-700 hover:text-black transition text-lg">
+        {/* <Link to="/payment-history" className="flex items-center gap-2 text-gray-700 hover:text-black transition text-lg">
           <FaMoneyBillWave className="text-xl" /> Payment History
-        </Link>
+        </Link> */}
 
         {/* Profile Dropdown */}
         <div className="relative flex flex-col items-end" ref={dropdownRef}>
@@ -147,9 +147,9 @@ const Navbar = ({ onLogout }) => {
           <Link to="/my-rentals" className="text-gray-700 hover:text-black transition text-lg flex items-center gap-2" onClick={() => setIsOpen(false)}>
             <FaBoxOpen className="text-xl" /> My Rentals
           </Link>
-          <Link to="/payment-history" className="text-gray-700 hover:text-black transition text-lg flex items-center gap-2" onClick={() => setIsOpen(false)}>
+          {/* <Link to="/payment-history" className="text-gray-700 hover:text-black transition text-lg flex items-center gap-2" onClick={() => setIsOpen(false)}>
             <FaMoneyBillWave className="text-xl" /> Payment History
-          </Link>
+          </Link> */}
 
           {/* Divider */}
           <hr className="my-2" />

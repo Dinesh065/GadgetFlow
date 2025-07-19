@@ -33,8 +33,10 @@ import HowItWorksSection from "../components/HowItWorksSection";
 import Categories from "../components/Categories";
 import WhyChooseUs from "../components/WhyChooseUs";
 import Testimonials from "../components/Testimonials";
+import ContactUs from "../components/ContactUs";
 import Footer from "../components/Footer";
 import { useNavigate } from "react-router-dom";
+
 export default function GadgetRentalLanding() {
   const navigate = useNavigate();
   const fadeInUp = {
@@ -97,7 +99,12 @@ export default function GadgetRentalLanding() {
             >
               Sign In
             </Button>
-            <Button className="bg-green-600 hover:bg-green-700">Get Started</Button>
+            <Button
+              onClick={() => navigate("/signup")}
+              className="bg-green-600 hover:bg-green-700"
+            >
+              Get Started
+            </Button>
             <Button variant="ghost" size="icon" className="md:hidden">
               <Menu className="h-5 w-5" />
             </Button>
@@ -109,10 +116,15 @@ export default function GadgetRentalLanding() {
       {/* Ensure all <Image> components are converted to <img> with src pointing to public folder if applicable */}
       {/* Replace all <Link href=...> with <a href=...> */}
       <HeroSection />
-      <HowItWorksSection />
+      <div id="how-it-works">
+        <HowItWorksSection />
+      </div>
       <Categories />
       <WhyChooseUs />
       <Testimonials />
+      <div id="contact">
+        <ContactUs />
+      </div>
       <Footer />
     </div>
   );

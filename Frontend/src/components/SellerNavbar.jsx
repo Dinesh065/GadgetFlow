@@ -77,6 +77,7 @@ import { Link, useLocation } from "react-router-dom";
 import {
   Menu, X, Home, List, Calendar, LogOut, ChevronDown, UserCircle
 } from "lucide-react";
+import { Truck } from "lucide-react";
 import { FaMoneyBillWave } from "react-icons/fa";
 import { API_BASE_URL } from "../config";
 import axios from "axios";
@@ -147,7 +148,7 @@ const SellerNavbar = ({ onLogout }) => {
           <NavItem to="/manage-listings" icon={<List size={20} />} text="Manage Listings" currentPath={location.pathname} />
           <NavItem to="/rental-calendar" icon={<Calendar size={20} />} text="Rental Calendar" currentPath={location.pathname} />
           <NavItem to="/earnings" icon={<FaMoneyBillWave size={20} />} text="My Earnings" currentPath={location.pathname} />
-          <NavItem to="/delivery-tracking" icon={<FaMoneyBillWave size={20} />} text="Delivery/Pickup Tracking" currentPath={location.pathname} />
+          <NavItem to="/delivery-tracking" icon={<Truck size={20} />} text="Track Status" currentPath={location.pathname} />
 
           {/* Profile Dropdown */}
           <div className="relative flex flex-col items-end group" ref={dropdownRef}>
@@ -186,7 +187,7 @@ const SellerNavbar = ({ onLogout }) => {
           <NavItem to="/manage-listings" icon={<List size={20} />} text="Manage Listings" mobile />
           <NavItem to="/rental-calendar" icon={<Calendar size={20} />} text="Rental Calendar" mobile />
           <NavItem to="/earnings" icon={<FaMoneyBillWave size={20} />} text="My Earnings" mobile />
-          <NavItem to="/delivery-tracking" icon={<FaMoneyBillWave size={20} />} text="Delivery/Pickup Tracking" mobile />
+          <NavItem to="/delivery-tracking" icon={<Truck size={20} />} text="Track Status" mobile />
           <Link to="/seller-profile" className="flex items-center space-x-2 text-gray-800 hover:text-orange-600 px-4 py-2">
             <UserCircle size={20} />
             <span className="text-[17px]">Profile</span>
