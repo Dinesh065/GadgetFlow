@@ -30,7 +30,7 @@ app.use(
 
 // CORS and other middlewares
 const corsOptions = {
-  origin: "https://gadget-flow-fjo9.vercel.app",
+  origin: process.env.CORS_ORIGIN,
   // origin: '*',
   credentials: true,
 };
