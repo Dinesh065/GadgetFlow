@@ -10,22 +10,22 @@ import { User } from "../models/user.model.js";
 const router = Router();
 
 // Upload Route - Cloudinary
-router.post('/upload', upload.array('images', 6), async (req, res) => {
-    try {
-        const uploadedUrls = [];
-        for (let file of req.files) {
-            const result = await uploadOnCloudinary(file.path);
-            if (result?.secure_url) {
-                uploadedUrls.push(result.secure_url);
-                fs.unlinkSync(file.path); // Remove local file
-            }
-        }
+router.post("/upload", upload.array("images", 6), async (req, res) => {
+  try {
+    const uploadedUrls = [];
 
-        res.json({ success: true, images: uploadedUrls });
-    } catch (error) {
-        console.error("Cloudinary upload error:", error);
-        res.status(500).json({ success: false, message: "Upload failed" });
+    for (const file of req.files) {
+      const result = await uploadOnCloudinary(file.buffer, file.originalname);
+      if (result?.secure_url) {
+        uploadedUrls.push(result.secure_url);
+      }
     }
+
+    res.json({ success: true, images: uploadedUrls });
+  } catch (error) {
+    console.error("Cloudinary upload error:", error);
+    res.status(500).json({ success: false, message: "Upload failed" });
+  }
 });
 
 // Add New Item

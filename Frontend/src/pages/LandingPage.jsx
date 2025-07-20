@@ -27,6 +27,7 @@ import {
   Phone,
   MapPin,
 } from "lucide-react";
+import { useState } from "react";
 import { motion } from "framer-motion";
 import HeroSection from "../components/HeroSection";
 import HowItWorksSection from "../components/HowItWorksSection";
@@ -39,6 +40,8 @@ import { useNavigate } from "react-router-dom";
 
 export default function GadgetRentalLanding() {
   const navigate = useNavigate();
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
   const fadeInUp = {
     initial: { opacity: 0, y: 60 },
     animate: { opacity: 1, y: 0 },
@@ -105,11 +108,43 @@ export default function GadgetRentalLanding() {
             >
               Get Started
             </Button>
-            <Button variant="ghost" size="icon" className="md:hidden">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="md:hidden"
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+            >
               <Menu className="h-5 w-5" />
             </Button>
           </div>
         </div>
+        {isMobileMenuOpen && (
+          <div className="md:hidden px-4 py-2 space-y-2 bg-white border-b shadow-sm">
+            <a href="#categories" className="block text-sm font-medium text-gray-700 hover:text-green-600">
+              Categories
+            </a>
+            <a href="#how-it-works" className="block text-sm font-medium text-gray-700 hover:text-green-600">
+              How It Works
+            </a>
+            <a href="#testimonials" className="block text-sm font-medium text-gray-700 hover:text-green-600">
+              Reviews
+            </a>
+            <a href="#contact" className="block text-sm font-medium text-gray-700 hover:text-green-600">
+              Contact
+            </a>
+            <Button
+              onClick={() => {
+                navigate("/login");
+                setIsMobileMenuOpen(false);
+              }}
+              variant="ghost"
+              className="w-full text-green-700 hover:text-green-800"
+            >
+              Sign In
+            </Button>
+          </div>
+        )}
+
       </motion.header>
 
       {/* Continue with rest of the JSX (Hero Section, How it Works, Categories, etc.) */}

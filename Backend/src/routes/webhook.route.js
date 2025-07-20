@@ -98,7 +98,7 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
 // This MUST be raw, not JSON
 router.post(
-  "/webhook",
+  "/",
   bodyParser.raw({ type: "application/json" }),
   async (req, res) => {
     // console.log("✅ Stripe Webhook Triggered");
