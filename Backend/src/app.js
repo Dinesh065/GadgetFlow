@@ -11,8 +11,9 @@ import buyerRoutes from "./routes/buyer.routes.js";
 import wishlistRoutes from "./routes/wishlist.route.js";
 import deliveryRoutes from "./routes/delivery.route.js";
 import authRoutes from "./routes/auth.route.js";
+import bodyParser from "body-parser";
 import paymentRoutes from "./routes/payment.route.js";
-import webhookRoutes from "./routes/webhook.route.js"; // 👈
+import webhookRoutes from "./routes/webhook.route.js"; 
 import stripeConnectRoutes from "./routes/stripeConnect.route.js";
 
 // Load .env
@@ -20,8 +21,12 @@ dotenv.config();
 
 const app = express();
 
-// ✅ Mount webhook BEFORE using express.json()
-app.use("/api/v1/webhook", webhookRoutes);
+// app.use("/api/v1/webhook", webhookRoutes);
+app.use(
+  "/api/v1/webhook",
+  bodyParser.raw({ type: "application/json" }),
+  webhookRoutes
+);
 
 // CORS and other middlewares
 const corsOptions = {
